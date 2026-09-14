@@ -66,7 +66,26 @@ public struct World: Sendable {
         stepBarrels()
         stepKong()          // after stepBarrels so a freshly thrown barrel does not move on its throw step
         stepFireballs()
+        stepBonus()
         checkCollisions()
+        checkGoal()
+    }
+
+    private mutating func stepBonus() {
+        game.bonusTickSteps += 1
+        guard game.bonusTickSteps >= Tuning.bonusTickSteps else { return }
+        game.bonusTickSteps = 0
+        game.bonus = max(0, game.bonus - Tuning.bonusTickAmount)
+        if game.bonus == 0 { die() }
+    }
+
+    private mutating func checkGoal() {
+        guard game.phase == .playing, player.bounds.intersects(level.goal) else { return }
+        let banked = game.bonus
+        addScore(banked)
+        emit(.levelCleared(bonus: banked))
+        player.state = .standing
+        enter(.levelCleared)
     }
 
     mutating func enter(_ phase: Phase) {

@@ -20,6 +20,15 @@ extension World {
     }
 }
 
+extension World {
+    /// Calls `addScore` and returns the events it emitted.
+    mutating func addScoreForTest(_ points: Int) -> [GameEvent] {
+        events = []
+        addScore(points)
+        return events
+    }
+}
+
 extension Input {
     static let none  = Input()
     static let left  = Input(left: true)
@@ -47,7 +56,8 @@ extension LevelLayout {
         ladders: [],
         playerSpawn: Vector2(x: 20, y: 53.13),
         kongPosition: Vector2(x: 10, y: 100), paulinePosition: Vector2(x: 500, y: 500),
-        goal: Rect(origin: Vector2(x: 500, y: 500), size: Vector2(x: 1, y: 1)),
+        // kept clear of (500, 500): several tests park the player there as "out of any hazard's reach"
+        goal: Rect(origin: Vector2(x: -1000, y: -1000), size: Vector2(x: 1, y: 1)),
         hammers: [], oilDrum: Rect(origin: Vector2(x: 500, y: 0), size: Vector2(x: 1, y: 1)),
         barrelSpawn: Vector2(x: 20, y: 100 - 7 * 20 / 208))
 }
