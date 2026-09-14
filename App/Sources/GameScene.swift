@@ -17,6 +17,7 @@ final class GameScene: SKScene {
     private let hud = HUDNode()
     private var lastTime: TimeInterval?
     private var accumulator: TimeInterval = 0
+    private var controllerInput: ControllerInput?
 
     override func didMove(to view: SKView) {
         backgroundColor = .black
@@ -44,6 +45,7 @@ final class GameScene: SKScene {
         playerNode = atlas.sprite("player_stand")
         dynamicLayer.addChild(playerNode)
         addChild(hud)
+        controllerInput = ControllerInput(inputState: inputState)
         syncNodes()
     }
 
