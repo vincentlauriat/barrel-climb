@@ -1,0 +1,25 @@
+# Xcode / SwiftPM
+.build/
+.swiftpm/
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+xcuserdata/
+
+# Release artifacts
+release/
+*.dmg
+*.zip
+
+# macOS
+.DS_Store
+
+# Agent tracking docs (local only)
+COMMANDS.md
+MEMORY.md
+CHANGES.md
+TODOS.md
+PLAN.md
+
+# OMC session state
+.omc/
