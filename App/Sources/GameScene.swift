@@ -17,7 +17,7 @@ final class GameScene: SKScene {
     private let hud = HUDNode()
     private var lastTime: TimeInterval?
     private var accumulator: TimeInterval = 0
-    private var controllerInput: ControllerInput?
+    private(set) var controllerInput: ControllerInput?
 
     override func didMove(to view: SKView) {
         backgroundColor = .black
