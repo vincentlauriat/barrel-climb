@@ -60,7 +60,7 @@ public struct World: Sendable {
     // MARK: - Internal helpers shared by the World+*.swift extensions
 
     /// One step of live gameplay. Later tasks append their sub-steps here, in this order:
-    /// player → barrels → kong → fireballs → bonus → collisions.
+    /// player → barrels → kong → fireballs → bonus → collisions → goal.
     mutating func stepPlaying(_ input: Input) {
         stepPlayer(input)
         stepBarrels()
