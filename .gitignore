@@ -5,6 +5,7 @@
 *.xcworkspace
 DerivedData/
 xcuserdata/
+build/
 
 # Release artifacts
 release/
