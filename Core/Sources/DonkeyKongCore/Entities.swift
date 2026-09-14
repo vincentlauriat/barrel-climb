@@ -12,6 +12,7 @@ public struct Player: Equatable, Sendable {
     public var jumpStartY = 0.0
     public var jumpDrift = 0.0                    // -1, 0, 1 locked at takeoff
     public var fallStartY = 0.0
+    public var jumpHeld = false
     public var isHammering: Bool { state == .hammering }
     /// Collision box (narrower than the sprite).
     public var bounds: Rect {

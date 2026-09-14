@@ -5,14 +5,22 @@ extension World {
             stepGrounded(input)
         case .falling:
             stepFall()
-        case .jumping, .climbing, .dying, .dead:
-            break   // jumping: Task 5, climbing: Task 6
+        case .jumping:
+            stepJump()
+        case .climbing, .dying, .dead:
+            break   // climbing: Task 6
         }
     }
 
     // MARK: Grounded
 
     private mutating func stepGrounded(_ input: Input) {
+        let jumpPressed = input.jump && !player.jumpHeld
+        player.jumpHeld = input.jump
+        if jumpPressed && !player.isHammering {
+            startJump(input)
+            return
+        }
         guard let dir = input.horizontal else {
             if player.state == .walking { player.state = .standing }
             return
@@ -91,6 +99,37 @@ extension World {
         }
         player.state = player.hammerStepsRemaining > 0 ? .hammering : .standing
         emit(.landed)
+    }
+
+    // MARK: Jumping
+
+    private mutating func startJump(_ input: Input) {
+        player.state = .jumping
+        player.jumpSteps = 0
+        player.jumpStartY = player.position.y
+        player.jumpDrift = input.horizontal?.sign ?? 0
+        if let d = input.horizontal { player.facing = d }
+        player.currentGirder = nil
+        emit(.jumped)
+    }
+
+    /// Fixed parabola: y(t) = y0 + 4·h·t·(1 − t), t ∈ [0, 1] over `jumpDurationSteps`.
+    private mutating func stepJump() {
+        player.jumpSteps += 1
+        let t = Double(player.jumpSteps) / Double(Tuning.jumpDurationSteps)
+        let prevY = player.position.y
+        player.position.x = clampX(
+            player.position.x + player.jumpDrift * Tuning.walkSpeedPointsPerSecond * Tuning.stepDuration,
+            halfWidth: Tuning.playerSize.x / 2)
+        player.position.y = player.jumpStartY + 4 * Tuning.jumpHeightPoints * t * (1 - t)
+        if t > 0.5, let gi = landingGirder(x: player.position.x, fromY: prevY, toY: player.position.y) {
+            player.fallStartY = player.jumpStartY
+            land(on: gi)
+        } else if t >= 1 {
+            player.state = .falling
+            player.fallStartY = player.jumpStartY
+            player.velocity = .zero
+        }
     }
 
     // MARK: Death
