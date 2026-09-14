@@ -62,6 +62,7 @@ public struct World: Sendable {
     /// One step of live gameplay. Later tasks append their sub-steps here, in this order:
     /// player → barrels → kong → fireballs → bonus → collisions.
     mutating func stepPlaying(_ input: Input) {
+        stepPlayer(input)
     }
 
     mutating func enter(_ phase: Phase) {
