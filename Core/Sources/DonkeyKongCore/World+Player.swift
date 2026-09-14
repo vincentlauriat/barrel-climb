@@ -7,14 +7,17 @@ extension World {
             stepFall()
         case .jumping:
             stepJump()
-        case .climbing, .dying, .dead:
-            break   // climbing: Task 6
+        case .climbing:
+            stepClimb(input)
+        case .dying, .dead:
+            break
         }
     }
 
     // MARK: Grounded
 
     private mutating func stepGrounded(_ input: Input) {
+        if !player.isHammering, tryEnterLadder(input) { return }
         let jumpPressed = input.jump && !player.jumpHeld
         player.jumpHeld = input.jump
         if jumpPressed && !player.isHammering {
@@ -130,6 +133,51 @@ extension World {
             player.fallStartY = player.jumpStartY
             player.velocity = .zero
         }
+    }
+
+    // MARK: Ladders
+
+    /// Enters an aligned ladder: `up` from its lower girder, `down` from its upper girder (never a broken one).
+    private mutating func tryEnterLadder(_ input: Input) -> Bool {
+        guard input.up != input.down else { return false }
+        for (i, l) in level.ladders.enumerated()
+        where abs(l.x - player.position.x) <= Tuning.ladderSnapTolerancePoints {
+            if input.up, player.currentGirder == l.lowerGirder {
+                enterLadder(i, atY: l.bottomY); return true
+            }
+            if input.down, !l.isBroken, player.currentGirder == l.upperGirder {
+                enterLadder(i, atY: l.topY); return true
+            }
+        }
+        return false
+    }
+
+    private mutating func enterLadder(_ i: Int, atY y: Double) {
+        player.state = .climbing
+        player.currentLadder = i
+        player.currentGirder = nil
+        player.position = Vector2(x: level.ladders[i].x, y: y)
+        emit(.climbStarted)
+    }
+
+    private mutating func stepClimb(_ input: Input) {
+        guard let li = player.currentLadder else { return }
+        let l = level.ladders[li]
+        let dy = Tuning.climbSpeedPointsPerSecond * Tuning.stepDuration
+        if input.up, !input.down {
+            player.position.y = min(l.topY, player.position.y + dy)
+            if player.position.y >= l.topY, !l.isBroken { leaveLadder(onto: l.upperGirder) }
+        } else if input.down, !input.up {
+            player.position.y = max(l.bottomY, player.position.y - dy)
+            if player.position.y <= l.bottomY { leaveLadder(onto: l.lowerGirder) }
+        }
+    }
+
+    private mutating func leaveLadder(onto gi: Int) {
+        player.currentLadder = nil
+        player.currentGirder = gi
+        player.position.y = level.girders[gi].surfaceY(at: player.position.x)
+        player.state = .standing
     }
 
     // MARK: Death
