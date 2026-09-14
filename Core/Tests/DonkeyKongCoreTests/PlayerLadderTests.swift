@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class PlayerLadderTests: XCTestCase {
@@ -12,13 +13,13 @@ final class PlayerLadderTests: XCTestCase {
 
     func testClimbingUpAnIntactLadderArrivesOnTheUpperGirder() {
         var w = World.playing()
-        placePlayer(&w, x: 186, girder: 1)                        // within the 4 pt snap tolerance
+        placePlayer(&w, x: 186, girder: 1)  // within the 4 pt snap tolerance
         let e = w.run(1, .up)
         XCTAssertEqual(w.player.state, .climbing)
         XCTAssertEqual(w.player.position.x, 184, "snapped to the ladder")
         XCTAssertEqual(w.player.currentLadder, 0)
         XCTAssertTrue(e.contains(.climbStarted))
-        w.run(90, .up)                                            // ~29 pt at 30 pt/s
+        w.run(90, .up)  // ~29 pt at 30 pt/s
         XCTAssertEqual(w.player.state, .standing)
         XCTAssertEqual(w.player.currentGirder, 2)
         XCTAssertEqual(w.player.position.y, level.girders[2].surfaceY(at: 184), accuracy: 1e-9)

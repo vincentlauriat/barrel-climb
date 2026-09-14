@@ -12,8 +12,9 @@ extension World {
         barrelsThrown += 1
         let kind: BarrelKind = barrelsThrown % Tuning.blueBarrelEvery == 0 ? .blue : .normal
         let spawn = level.barrelSpawn
-        let barrel = Barrel(id: allocateID(), kind: kind, position: spawn, direction: .right,
-                            currentGirder: girderIndex(atX: spawn.x, nearY: spawn.y))
+        let barrel = Barrel(
+            id: allocateID(), kind: kind, position: spawn, direction: .right,
+            currentGirder: girderIndex(atX: spawn.x, nearY: spawn.y))
         barrels.append(barrel)
         emit(.barrelThrown(id: barrel.id))
     }
@@ -37,8 +38,8 @@ extension World {
 
     private mutating func stepBarrel(_ b: inout Barrel) {
         switch b.state {
-        case .rolling:  rollBarrel(&b)
-        case .falling:  fallBarrel(&b)
+        case .rolling: rollBarrel(&b)
+        case .falling: fallBarrel(&b)
         case .onLadder: descendLadder(&b)
         }
     }
@@ -62,14 +63,14 @@ extension World {
             return
         }
 
-        if nx < 0 || nx > Tuning.sceneWidth {                 // scene edge: bounce back
+        if nx < 0 || nx > Tuning.sceneWidth {  // scene edge: bounce back
             b.direction = b.direction.flipped
             nx = clampX(nx, halfWidth: 0)
         }
         if g.contains(x: nx) {
             b.position = Vector2(x: nx, y: g.surfaceY(at: nx))
         } else if let ni = girderIndex(atX: nx, nearY: g.surfaceY(at: b.position.x)) {
-            b.currentGirder = ni                                // connected girder, same direction
+            b.currentGirder = ni  // connected girder, same direction
             b.position = Vector2(x: nx, y: level.girders[ni].surfaceY(at: nx))
         } else {
             b.state = .falling
@@ -88,7 +89,7 @@ extension World {
             b.position.y = level.girders[gi].surfaceY(at: b.position.x)
             b.velocity = .zero
             b.state = .rolling
-            b.direction = b.direction.flipped                   // every fall reverses
+            b.direction = b.direction.flipped  // every fall reverses
         }
     }
 
@@ -99,7 +100,7 @@ extension World {
         if b.position.y <= l.bottomY {
             b.position.y = l.bottomY
             b.currentLadder = nil
-            b.currentGirder = l.lowerGirder                     // keeps its direction
+            b.currentGirder = l.lowerGirder  // keeps its direction
             b.state = .rolling
         }
     }
@@ -109,8 +110,10 @@ extension World {
         guard fireballs.count < Tuning.maxFireballs else { return }
         let x = level.oilDrum.maxX + Tuning.fireballSize.x
         guard let gi = girderIndex(atX: x, nearY: level.oilDrum.minY) else { return }
-        fireballs.append(Fireball(id: allocateID(), position: Vector2(x: x, y: level.girders[gi].surfaceY(at: x)),
-                                  direction: .right, currentGirder: gi))
+        fireballs.append(
+            Fireball(
+                id: allocateID(), position: Vector2(x: x, y: level.girders[gi].surfaceY(at: x)),
+                direction: .right, currentGirder: gi))
         emit(.fireballSpawned)
     }
 

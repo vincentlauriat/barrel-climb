@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class CollisionTests: XCTestCase {
@@ -6,7 +7,8 @@ final class CollisionTests: XCTestCase {
 
     func testBarrelContactKills() {
         var w = World.playing()
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 42, y: 8), direction: .left, currentGirder: 0))
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 42, y: 8), direction: .left, currentGirder: 0))
         let e = w.run(1)
         XCTAssertEqual(w.player.state, .dying)
         XCTAssertEqual(w.game.phase, .playerDied)
@@ -20,8 +22,9 @@ final class CollisionTests: XCTestCase {
     }
     func testJumpingOverABarrelScoresOnceAndSurvives() {
         var w = World.playing()
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 70, y: 8), direction: .left, currentGirder: 0))
-        w.run(25)                                                  // barrel now at x ≈ 51
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 70, y: 8), direction: .left, currentGirder: 0))
+        w.run(25)  // barrel now at x ≈ 51
         w.run(1, .jump)
         let e = w.run(40)
         XCTAssertEqual(w.game.phase, .playing)
@@ -31,8 +34,9 @@ final class CollisionTests: XCTestCase {
     }
     func testJumpingTooLateIsDeath() {
         var w = World.playing()
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 70, y: 8), direction: .left, currentGirder: 0))
-        w.run(30)                                                  // barrel at x ≈ 47.5, not yet touching
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 70, y: 8), direction: .left, currentGirder: 0))
+        w.run(30)  // barrel at x ≈ 47.5, not yet touching
         w.run(1, .jump)
         w.run(5)
         XCTAssertEqual(w.player.state, .dying)
@@ -41,8 +45,10 @@ final class CollisionTests: XCTestCase {
         var w = World.playing()
         w.player.position = Vector2(x: 184, y: 25); w.player.state = .climbing
         w.player.currentLadder = 0; w.player.currentGirder = nil
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 184, y: level.girders[2].surfaceY(at: 184)),
-                                direction: .right, currentGirder: 2))
+        w.barrels.append(
+            Barrel(
+                id: 1, kind: .normal, position: Vector2(x: 184, y: level.girders[2].surfaceY(at: 184)),
+                direction: .right, currentGirder: 2))
         w.run(1)
         XCTAssertEqual(w.player.state, .climbing)
     }
@@ -60,7 +66,8 @@ final class CollisionTests: XCTestCase {
     func testHammerDestroysBarrelsAndFireballs() {
         var w = World.playing()
         w.player.state = .hammering; w.player.hammerStepsRemaining = 200; w.player.facing = .right
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 54, y: 8), direction: .left, currentGirder: 0))
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 54, y: 8), direction: .left, currentGirder: 0))
         let e = w.run(Tuning.hammerSwingPeriodSteps * 2)
         XCTAssertTrue(w.barrels.isEmpty)
         XCTAssertEqual(w.game.score, Tuning.scoreHammerBarrel)
@@ -81,7 +88,8 @@ final class CollisionTests: XCTestCase {
     func testDyingPlayerIgnoresFurtherHazards() {
         var w = World.playing()
         w.die()
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 40, y: 8), direction: .left, currentGirder: 0))
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 40, y: 8), direction: .left, currentGirder: 0))
         let e = w.run(1)
         XCTAssertFalse(e.contains(.playerDied))
     }

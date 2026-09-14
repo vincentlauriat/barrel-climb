@@ -64,7 +64,7 @@ public struct World: Sendable {
     mutating func stepPlaying(_ input: Input) {
         stepPlayer(input)
         stepBarrels()
-        stepKong()          // after stepBarrels so a freshly thrown barrel does not move on its throw step
+        stepKong()  // after stepBarrels so a freshly thrown barrel does not move on its throw step
         stepFireballs()
         stepBonus()
         checkCollisions()
@@ -121,7 +121,8 @@ public struct World: Sendable {
     mutating func allocateID() -> Int { defer { nextEntityID += 1 }; return nextEntityID }
 
     var throwInterval: Int {
-        max(Tuning.kongThrowIntervalMinSteps,
+        max(
+            Tuning.kongThrowIntervalMinSteps,
             Tuning.kongThrowIntervalSteps - game.loop * Tuning.kongThrowIntervalLoopDeltaSteps)
     }
     var barrelSpeed: Double {

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class GameFlowTests: XCTestCase {
@@ -30,7 +31,8 @@ final class GameFlowTests: XCTestCase {
         XCTAssertEqual(w.game.loop, 1)
         XCTAssertEqual(w.game.bonus, Tuning.bonusStart)
         XCTAssertEqual(w.player.position, Levels.barrels.playerSpawn)
-        XCTAssertEqual(w.kong.throwCooldownSteps, Tuning.kongThrowIntervalSteps - Tuning.kongThrowIntervalLoopDeltaSteps)
+        XCTAssertEqual(
+            w.kong.throwCooldownSteps, Tuning.kongThrowIntervalSteps - Tuning.kongThrowIntervalLoopDeltaSteps)
         XCTAssertEqual(w.barrelSpeed, Tuning.barrelSpeedPointsPerSecond * 1.1, accuracy: 1e-9)
     }
     func testThrowIntervalHasAFloor() {
@@ -62,7 +64,8 @@ final class GameFlowTests: XCTestCase {
     }
     func testDeathClearsBarrelsAndHammers() {
         var w = World.playing()
-        w.barrels.append(Barrel(id: 1, kind: .normal, position: Vector2(x: 150, y: 8), direction: .left, currentGirder: 0))
+        w.barrels.append(
+            Barrel(id: 1, kind: .normal, position: Vector2(x: 150, y: 8), direction: .left, currentGirder: 0))
         w.hammersTaken = [0]
         w.die(); w.run(Tuning.dyingDurationSteps)
         XCTAssertTrue(w.barrels.isEmpty)

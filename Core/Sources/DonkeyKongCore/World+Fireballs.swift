@@ -19,7 +19,8 @@ extension World {
 
         // Any intact ladder touching this girder, up or down, one roll each.
         if let (li, up) = ladderCrossing(girder: f.currentGirder, from: prevX, to: nx),
-           random.next(below: Tuning.fireballLadderChanceOneIn) == 0 {
+            random.next(below: Tuning.fireballLadderChanceOneIn) == 0
+        {
             let l = level.ladders[li]
             f.currentLadder = li
             f.climbingUp = up
@@ -31,7 +32,7 @@ extension World {
             if let ni = girderIndex(atX: nx, nearY: g.surfaceY(at: f.position.x)), nx >= 0, nx <= Tuning.sceneWidth {
                 f.currentGirder = ni
             } else {
-                f.direction = f.direction.flipped              // fireballs never fall
+                f.direction = f.direction.flipped  // fireballs never fall
                 nx = f.position.x
             }
         }

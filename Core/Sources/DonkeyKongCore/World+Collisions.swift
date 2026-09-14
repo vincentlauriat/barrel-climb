@@ -15,7 +15,7 @@ extension World {
             hammersTaken.insert(i)
             player.hammerStepsRemaining = Tuning.hammerDurationSteps
             if player.state == .standing || player.state == .walking { player.state = .hammering }
-            emit(.hammerPicked)                                   // mid-jump: `land(on:)` switches to .hammering
+            emit(.hammerPicked)  // mid-jump: `land(on:)` switches to .hammering
             return
         }
     }
@@ -29,7 +29,9 @@ extension World {
                 barrels.remove(at: i)
                 addScore(Tuning.scoreHammerBarrel)
                 emit(.hammerHit(id: id, points: Tuning.scoreHammerBarrel))
-            } else { i += 1 }
+            } else {
+                i += 1
+            }
         }
         i = 0
         while i < fireballs.count {
@@ -38,7 +40,9 @@ extension World {
                 fireballs.remove(at: i)
                 addScore(Tuning.scoreHammerFireball)
                 emit(.hammerHit(id: id, points: Tuning.scoreHammerFireball))
-            } else { i += 1 }
+            } else {
+                i += 1
+            }
         }
     }
 
@@ -46,7 +50,8 @@ extension World {
     private mutating func awardJumpBonuses() {
         guard player.state == .jumping else { return }
         for b in barrels where !jumpedBarrelIDs.contains(b.id) {
-            let horizontallyUnder = abs(b.position.x - player.position.x) < (Tuning.playerHitbox.x + Tuning.barrelHitbox.x) / 2
+            let horizontallyUnder =
+                abs(b.position.x - player.position.x) < (Tuning.playerHitbox.x + Tuning.barrelHitbox.x) / 2
             let above = player.position.y > b.bounds.maxY
             if horizontallyUnder && above {
                 jumpedBarrelIDs.insert(b.id)

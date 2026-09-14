@@ -1,7 +1,9 @@
-public enum PlayerState: Equatable, Sendable { case standing, walking, jumping, falling, climbing, hammering, dying, dead }
+public enum PlayerState: Equatable, Sendable {
+    case standing, walking, jumping, falling, climbing, hammering, dying, dead
+}
 
 public struct Player: Equatable, Sendable {
-    public var position: Vector2                 // bottom-center
+    public var position: Vector2  // bottom-center
     public var velocity = Vector2.zero
     public var facing = Direction.right
     public var state = PlayerState.standing
@@ -10,7 +12,7 @@ public struct Player: Equatable, Sendable {
     public var currentLadder: Int?
     public var jumpSteps = 0
     public var jumpStartY = 0.0
-    public var jumpDrift = 0.0                    // -1, 0, 1 locked at takeoff
+    public var jumpDrift = 0.0  // -1, 0, 1 locked at takeoff
     public var fallStartY = 0.0
     public var jumpHeld = false
     public var isHammering: Bool { state == .hammering }
@@ -34,7 +36,7 @@ public struct Barrel: Equatable, Sendable {
     public let id: Int
     public var kind: BarrelKind
     public var state = BarrelState.rolling
-    public var position: Vector2                 // bottom-center
+    public var position: Vector2  // bottom-center
     public var velocity = Vector2.zero
     public var direction = Direction.right
     public var currentGirder: Int?
@@ -46,7 +48,7 @@ public struct Barrel: Equatable, Sendable {
 
 public struct Fireball: Equatable, Sendable {
     public let id: Int
-    public var position: Vector2                 // bottom-center
+    public var position: Vector2  // bottom-center
     public var direction = Direction.right
     public var currentGirder: Int
     public var currentLadder: Int?

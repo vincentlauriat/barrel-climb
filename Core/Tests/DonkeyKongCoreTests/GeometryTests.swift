@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class GeometryTests: XCTestCase {

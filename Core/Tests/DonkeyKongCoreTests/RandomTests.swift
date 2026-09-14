@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class RandomTests: XCTestCase {
@@ -14,7 +15,8 @@ final class RandomTests: XCTestCase {
     }
     func testDifferentSeedsDiffer() {
         var a = SeededRandom(seed: 1), b = SeededRandom(seed: 2)
-        XCTAssertNotEqual((0..<20).map { _ in a.next(below: 100) },
-                          (0..<20).map { _ in b.next(below: 100) })
+        XCTAssertNotEqual(
+            (0..<20).map { _ in a.next(below: 100) },
+            (0..<20).map { _ in b.next(below: 100) })
     }
 }

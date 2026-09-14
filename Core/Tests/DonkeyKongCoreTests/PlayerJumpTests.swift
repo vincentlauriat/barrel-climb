@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DonkeyKongCore
 
 final class PlayerJumpTests: XCTestCase {
@@ -7,7 +8,7 @@ final class PlayerJumpTests: XCTestCase {
         let start = w.run(1, .jump)
         XCTAssertEqual(w.player.state, .jumping)
         XCTAssertTrue(start.contains(.jumped))
-        w.run(Tuning.jumpDurationSteps / 2)               // the trigger step itself does not move
+        w.run(Tuning.jumpDurationSteps / 2)  // the trigger step itself does not move
         XCTAssertEqual(w.player.position.y, 8 + Tuning.jumpHeightPoints, accuracy: 1e-9)
         let landing = w.run(Tuning.jumpDurationSteps / 2)
         XCTAssertEqual(w.player.state, .standing)
@@ -18,7 +19,7 @@ final class PlayerJumpTests: XCTestCase {
     func testJumpDriftIsLockedAtTakeoff() {
         var w = World.playing()
         w.run(1, Input(right: true, jump: true))
-        w.run(Tuning.jumpDurationSteps, .left)            // trying to reverse mid-air does nothing
+        w.run(Tuning.jumpDurationSteps, .left)  // trying to reverse mid-air does nothing
         XCTAssertEqual(w.player.position.x, 40 + Tuning.walkSpeedPointsPerSecond / 2, accuracy: 1e-6)
         XCTAssertEqual(w.player.facing, .right)
     }
