@@ -65,6 +65,7 @@ public struct World: Sendable {
         stepPlayer(input)
         stepBarrels()
         stepKong()          // after stepBarrels so a freshly thrown barrel does not move on its throw step
+        stepFireballs()
     }
 
     mutating func enter(_ phase: Phase) {
