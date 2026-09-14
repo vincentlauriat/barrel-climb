@@ -32,7 +32,7 @@ DonkeyKong/
 │   ├── Sources/                # shared macOS + iOS: SpriteKit scene, nodes, input merging
 │   ├── Platform/macOS/         # AppDelegate, window, keyboard
 │   ├── Platform/iOS/           # SceneDelegate, touch overlay
-│   └── Resources/              # sprites/*.png, sounds/*.caf, Assets.xcassets
+│   └── Resources/              # sprites/*.png, sounds/*.wav, Assets.xcassets
 ├── Tools/gen_sprites.py        # deterministic pixel-art generator; output committed
 └── docs/superpowers/specs/
 ```
@@ -300,7 +300,7 @@ PNG via `zlib` by hand) produces 16-colour pixel art into `App/Resources/sprites
 player (stand, walk ×2, jump, climb ×2, hammer ×2, die), barrel (normal ×4 rotation,
 blue ×4), fireball ×2, Kong (idle, throw), Pauline ×2, hammer, oil drum, girder tile,
 ladder tile, broken-ladder tile. Deterministic output, committed; regenerate with
-`make sprites`. Sounds are short `.caf` files synthesized by `Tools/gen_sounds.py`
+`make sprites`. Sounds are short `.wav` files synthesized by `Tools/gen_sounds.py`
 (square-wave beeps), also committed.
 
 ## Testing

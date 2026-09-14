@@ -12,9 +12,9 @@ final class HUDNode: SKNode {
         super.init()
         for (label, x, y, align) in [
             (score, 4.0, 254.0, SKLabelHorizontalAlignmentMode.left),
-            (bonus, 4.0, 245.0, .left),
             (lives, 220.0, 254.0, .right),
             (loop, 220.0, 245.0, .right),
+            (bonus, 220.0, 236.0, .right),
         ] {
             label.fontSize = 7
             label.fontColor = .white
