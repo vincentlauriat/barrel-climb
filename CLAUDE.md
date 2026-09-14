@@ -88,7 +88,7 @@ Core/Sources/DonkeyKongCore/   simulation — group by concept (Player, Barrel, 
 Core/Tests/DonkeyKongCoreTests/ mirrors the source file names
 App/Sources/                   shared macOS + iOS SpriteKit code
 App/Platform/{macOS,iOS}/      thin shells: window/scene delegates, keyboard, touch overlay
-App/Resources/                 sprites/*.png (generated), sounds/*.caf (generated)
+App/Resources/                 sprites/*.png (generated), sounds/*.wav (generated)
 Tools/                         gen_sprites.py, gen_sounds.py — stdlib only, deterministic
 docs/superpowers/specs/        design specs, one per sub-project
 ```
