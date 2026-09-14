@@ -1,5 +1,6 @@
 extension World {
     mutating func stepPlayer(_ input: Input) {
+        tickHammer()
         switch player.state {
         case .standing, .walking, .hammering:
             stepGrounded(input)
@@ -178,6 +179,17 @@ extension World {
         player.currentGirder = gi
         player.position.y = level.girders[gi].surfaceY(at: player.position.x)
         player.state = .standing
+    }
+
+    // MARK: Hammer
+
+    mutating func tickHammer() {
+        guard player.hammerStepsRemaining > 0 else { return }
+        player.hammerStepsRemaining -= 1
+        if player.hammerStepsRemaining == 0 {
+            if player.state == .hammering { player.state = .standing }
+            emit(.hammerExpired)
+        }
     }
 
     // MARK: Death

@@ -40,6 +40,7 @@ final class BarrelLadderTests: XCTestCase {
     }
     func testBlueBarrelsIntoTheOilDrumSpawnAtMostTwoFireballs() {
         var w = World.playing()
+        w.player.position = Vector2(x: 200, y: w.player.position.y)   // out of the barrels' path (task 10: barrel contact now kills)
         for (i, x) in [40.0, 50.0, 60.0].enumerated() {
             w.barrels.append(Barrel(id: 100 + i, kind: .blue, position: Vector2(x: x, y: 8), direction: .left, currentGirder: 0))
         }

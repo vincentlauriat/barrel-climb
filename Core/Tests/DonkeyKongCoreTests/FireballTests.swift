@@ -5,6 +5,7 @@ final class FireballTests: XCTestCase {
     func worldWithFireball(x: Double, girder: Int, direction: Direction, random: RandomSource) -> World {
         var w = World(level: Levels.barrels, random: random)
         w.start(); w.run(Tuning.introDurationSteps)
+        w.player.position = Vector2(x: 500, y: 500)                // out of the fireball's path (task 10: contact now kills)
         w.fireballs.append(Fireball(id: 7, position: Vector2(x: x, y: Levels.barrels.girders[girder].surfaceY(at: x)),
                                     direction: direction, currentGirder: girder))
         return w

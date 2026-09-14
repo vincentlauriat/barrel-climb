@@ -16,6 +16,7 @@ final class BarrelTests: XCTestCase {
     }
     func testEveryEighthBarrelIsBlue() {
         var w = World.playing(level: .twoGirders)
+        w.player.position = Vector2(x: 500, y: 500)                // out of any barrel's reach (task 10: contact now kills)
         for n in 1...Tuning.blueBarrelEvery {
             w.run(Tuning.kongThrowIntervalSteps)
             XCTAssertEqual(w.barrels.last?.kind, n == Tuning.blueBarrelEvery ? .blue : .normal, "barrel \(n)")
@@ -55,6 +56,7 @@ final class BarrelTests: XCTestCase {
     }
     func testBarrelIsRemovedInTheOilDrum() {
         var w = World.playing()
+        w.player.position = Vector2(x: 500, y: 500)                // out of the barrel's path (task 10: contact now kills)
         w.barrels.append(Barrel(id: 99, kind: .normal, position: Vector2(x: 40, y: 8), direction: .left, currentGirder: 0))
         w.run(60)
         XCTAssertTrue(w.barrels.isEmpty)
