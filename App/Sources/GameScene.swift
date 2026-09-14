@@ -15,6 +15,8 @@ final class GameScene: SKScene {
     private var paulineNode: SKSpriteNode!
     private var hammerNodes: [SKSpriteNode] = []
     private let hud = HUDNode()
+    private let sounds = SoundPlayer()
+    private let overlay = OverlayNode()
     private var lastTime: TimeInterval?
     private var accumulator: TimeInterval = 0
     private(set) var controllerInput: ControllerInput?
@@ -45,6 +47,7 @@ final class GameScene: SKScene {
         playerNode = atlas.sprite("player_stand")
         dynamicLayer.addChild(playerNode)
         addChild(hud)
+        addChild(overlay)
         controllerInput = ControllerInput(inputState: inputState)
         syncNodes()
     }
@@ -69,7 +72,21 @@ final class GameScene: SKScene {
     /// Reacts to what the step reported. Task 17 adds sounds and overlays here.
     func handle(_ events: [GameEvent]) {
         for e in events {
-            if case .scoreChanged = e { hud.update(world.game) }
+            switch e {
+            case .jumped: sounds.play("jump")
+            case .barrelThrown: sounds.play("barrel")
+            case .hammerHit: sounds.play("hammer")
+            case .hammerPicked: sounds.play("pickup")
+            case .barrelJumped: sounds.play("bonus")
+            case .playerDied:
+                sounds.play("die")
+                playerNode.run(
+                    .sequence([.rotate(byAngle: .pi * 2, duration: 1.0), .fadeOut(withDuration: 0.3)]),
+                    withKey: "death")
+            case .levelCleared: sounds.play("clear")
+            case .scoreChanged, .extraLife: hud.update(world.game)
+            case .landed, .climbStarted, .hammerExpired, .fireballSpawned, .gameOver: break
+            }
         }
     }
 
@@ -99,6 +116,12 @@ final class GameScene: SKScene {
         paulineNode.texture = atlas.texture((t / 30) % 2 == 0 ? "pauline_1" : "pauline_2")
         for (i, n) in hammerNodes.enumerated() { n.isHidden = world.hammersTaken.contains(i) }
         hud.update(world.game)
+        overlay.show(world.game)
+        if world.player.state != .dying, playerNode.action(forKey: "death") != nil {
+            playerNode.removeAction(forKey: "death")
+            playerNode.zRotation = 0
+            playerNode.alpha = 1
+        }
     }
 
     private func place(id: Int, texture: String, at p: Vector2, flipped: Bool) {

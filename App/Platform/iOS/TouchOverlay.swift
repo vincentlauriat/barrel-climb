@@ -1,7 +1,7 @@
 import DonkeyKongCore
 import UIKit
 
-/// Left third: four-way pad. Right third: jump. Multi-touch so run + jump works together.
+/// Left half: four-way pad. Right half: jump. Multi-touch so run + jump works together.
 final class TouchOverlay: UIView {
     private let inputState: InputState
     private let pad = UIView()

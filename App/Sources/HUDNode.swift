@@ -10,20 +10,19 @@ final class HUDNode: SKNode {
 
     override init() {
         super.init()
-        for (label, x, align) in [
-            (score, 4.0, SKLabelHorizontalAlignmentMode.left),
-            (bonus, 112.0, .center),
-            (lives, 220.0, .right),
-            (loop, 220.0, .right),
+        for (label, x, y, align) in [
+            (score, 4.0, 254.0, SKLabelHorizontalAlignmentMode.left),
+            (bonus, 4.0, 245.0, .left),
+            (lives, 220.0, 254.0, .right),
+            (loop, 220.0, 245.0, .right),
         ] {
             label.fontSize = 7
             label.fontColor = .white
             label.horizontalAlignmentMode = align
             label.verticalAlignmentMode = .top
-            label.position = CGPoint(x: x, y: 254)
+            label.position = CGPoint(x: x, y: y)
             addChild(label)
         }
-        loop.position.y = 245
         zPosition = 10
     }
     required init?(coder: NSCoder) { fatalError() }
