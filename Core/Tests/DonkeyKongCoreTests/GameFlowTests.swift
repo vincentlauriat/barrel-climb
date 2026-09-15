@@ -35,6 +35,14 @@ final class GameFlowTests: XCTestCase {
             w.kong.throwCooldownSteps, Tuning.kongThrowIntervalSteps - Tuning.kongThrowIntervalLoopDeltaSteps)
         XCTAssertEqual(w.barrelSpeed, Tuning.barrelSpeedPointsPerSecond * 1.1, accuracy: 1e-9)
     }
+    func testGoalIgnoredWhileStillOnTheLadder() {
+        var w = World.playing()
+        let goal = Levels.barrels.goal
+        w.player.position = Vector2(x: 72, y: goal.minY); w.player.state = .climbing
+        w.player.currentLadder = 14; w.player.currentGirder = nil
+        w.run(1)
+        XCTAssertEqual(w.game.phase, .playing)
+    }
     func testThrowIntervalHasAFloor() {
         var w = World.playing()
         w.game.loop = 50
@@ -61,6 +69,17 @@ final class GameFlowTests: XCTestCase {
         let e2 = w.addScoreForTest(Tuning.extraLifeScore)
         XCTAssertEqual(w.game.lives, Tuning.livesStart + 1)
         XCTAssertFalse(e2.contains(.extraLife))
+    }
+    func testJumpHeldThroughRespawnDoesNotAutoJump() {
+        var w = World.playing()
+        w.player.jumpHeld = true  // the button was already down when the barrel hit
+        w.die()
+        w.run(Tuning.dyingDurationSteps, .jump)  // held through the death animation and the respawn
+        w.run(1, .jump)
+        XCTAssertEqual(w.player.state, .standing)  // still held from before death: no fresh press
+        w.run(1, .none)
+        w.run(1, .jump)
+        XCTAssertEqual(w.player.state, .jumping)  // released then pressed again: a real jump
     }
     func testDeathClearsBarrelsAndHammers() {
         var w = World.playing()

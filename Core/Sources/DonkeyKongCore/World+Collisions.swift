@@ -61,8 +61,16 @@ extension World {
         }
     }
 
+    /// Barrels do not hit a player who is on a ladder below the upper girder's surface — a
+    /// deliberate refuge. Fireballs are not affected: they can enter ladders themselves.
     private func hazardTouchesPlayer() -> Bool {
         let p = player.bounds
+        if player.state == .climbing, let li = player.currentLadder {
+            let top = level.girders[level.ladders[li].upperGirder].surfaceY(at: player.position.x)
+            if player.position.y < top {
+                return fireballs.contains { $0.bounds.intersects(p) }
+            }
+        }
         return barrels.contains { $0.bounds.intersects(p) } || fireballs.contains { $0.bounds.intersects(p) }
     }
 }

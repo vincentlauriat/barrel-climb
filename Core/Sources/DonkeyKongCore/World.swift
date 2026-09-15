@@ -80,7 +80,9 @@ public struct World: Sendable {
     }
 
     private mutating func checkGoal() {
-        guard game.phase == .playing, player.bounds.intersects(level.goal) else { return }
+        guard game.phase == .playing, player.currentLadder == nil, player.bounds.intersects(level.goal) else {
+            return
+        }
         let banked = game.bonus
         addScore(banked)
         emit(.levelCleared(bonus: banked))
@@ -95,7 +97,9 @@ public struct World: Sendable {
 
     /// Puts the level back to its start state. Score, lives and loop are kept.
     mutating func resetLevel() {
+        let held = player.jumpHeld
         player = Player(position: level.playerSpawn, currentGirder: 0)
+        player.jumpHeld = held
         barrels = []
         fireballs = []
         hammersTaken = []

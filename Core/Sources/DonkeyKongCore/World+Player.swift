@@ -178,7 +178,7 @@ extension World {
         player.currentLadder = nil
         player.currentGirder = gi
         player.position.y = level.girders[gi].surfaceY(at: player.position.x)
-        player.state = .standing
+        player.state = player.hammerStepsRemaining > 0 ? .hammering : .standing
     }
 
     // MARK: Hammer

@@ -52,5 +52,5 @@ public enum Tuning {
     public static let scoreHammerBarrel = 300
     public static let scoreHammerFireball = 500
     public static let brokenLadderHeightPoints = 20.0
-    public static let hammerHeightAboveGirderPoints = 22.0
+    public static let hammerHeightAboveGirderPoints = 16.0
 }
