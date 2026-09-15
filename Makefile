@@ -1,4 +1,4 @@
-.PHONY: generate test build-mac build-ios run-mac lint sprites sounds clean
+.PHONY: generate test build-mac build-ios run-mac lint sprites sounds icon clean
 
 XCODEBUILD = xcodebuild -project DonkeyKong.xcodeproj -scheme DonkeyKong CODE_SIGNING_ALLOWED=NO -quiet
 DERIVED    = build/DerivedData
@@ -26,6 +26,9 @@ sprites:
 
 sounds:
 	python3 Tools/gen_sounds.py App/Resources/sounds
+
+icon:
+	python3 Tools/gen_icon.py App/Resources/Assets.xcassets/AppIcon.appiconset
 
 clean:
 	rm -rf build DonkeyKong.xcodeproj
