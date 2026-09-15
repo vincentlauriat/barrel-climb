@@ -8,7 +8,9 @@ Sub-project 1 is merged on `main` (2026-09-15): the barrels stage is playable on
 macOS and iOS, `Core/` holds 76 deterministic tests, and the app ships a generated
 icon for the Dock and both iOS home screens. Published at
 https://github.com/vincentlauriat/barrel-climb with a landing page on GitHub Pages
-(`main:/docs`). Next sub-projects: pie factory, elevators, rivets.
+(`main:/docs`). **v1.0.0 has shipped**: a signed, notarized, stapled DMG on the
+releases page, with Sparkle reading `docs/appcast.xml` from the same Pages site.
+Next sub-projects: pie factory, elevators, rivets.
 
 ## What this is
 
