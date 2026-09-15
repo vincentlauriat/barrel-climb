@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barrel Climb</title>
+<meta name="description" content="An original arcade platformer for macOS and iOS, including iPhone Duo. Climb the girders, dodge the barrels, grab the hammer. Open source, deterministic Swift core.">
+<meta property="og:title" content="Barrel Climb">
+<meta property="og:description" content="An original arcade platformer for macOS and iOS. Open source.">
+<meta property="og:image" content="https://vincentlauriat.github.io/barrel-climb/assets/title.png">
+<link rel="icon" href="assets/barrel_0.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crt: #000000;
+    --phosphor: #f0f0f0;
+    --dim: #9a9a9a;
+    --girder: #fa50c8;
+    --girder-dark: #962878;
+    --ladder: #50c8ff;
+    --barrel: #78461e;
+    --hammer: #fadc3c;
+    --display: "Press Start 2P", "Courier New", monospace;
+    --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --measure: 62ch;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--crt); color-scheme: dark; }
+  body {
+    margin: 0;
+    background: var(--crt);
+    color: var(--phosphor);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.55;
+    padding-inline: 20px;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; height: auto; display: block; }
+  .px { image-rendering: pixelated; image-rendering: crisp-edges; }
+  a { color: var(--ladder); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--hammer); outline-offset: 3px; }
+  main { max-width: 880px; margin: 0 auto; }
+
+  h1, h2, .display { font-family: var(--display); font-weight: 400; line-height: 1.5; }
+  h2 { font-size: clamp(14px, 2.2vw, 18px); color: var(--girder); margin: 0 0 20px; }
+  p { max-width: var(--measure); margin: 0 0 16px; }
+  section { padding-block: 56px; border-top: 8px solid transparent; }
+  section + section { border-image: url("assets/girder.png") 8 / 8px round; }
+
+  /* Hero — the attract screen */
+  .hero { position: relative; padding-block: 72px 48px; min-height: 60vh; }
+  .hero h1 {
+    font-size: clamp(26px, 6.5vw, 56px);
+    margin: 0 0 22px;
+    color: var(--phosphor);
+    text-shadow: 4px 4px 0 var(--girder-dark);
+    max-width: 12ch;
+  }
+  .hero .lede { font-size: 19px; max-width: 44ch; }
+  .hero .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+  .btn {
+    font-family: var(--display); font-size: 12px; line-height: 1;
+    padding: 16px 20px; text-decoration: none; color: var(--crt);
+    background: var(--hammer); border: 0; display: inline-block;
+    box-shadow: 4px 4px 0 var(--girder-dark);
+  }
+  .btn.secondary { background: transparent; color: var(--phosphor); box-shadow: inset 0 0 0 3px var(--ladder); }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--girder-dark); }
+  .btn.secondary:hover { box-shadow: inset 0 0 0 3px var(--hammer); }
+
+  /* The signature: one sloped girder with a rolling barrel */
+  .girder-run {
+    position: absolute; left: -10vw; right: -10vw; bottom: 8px; height: 24px;
+    background: url("assets/girder.png") repeat-x; background-size: 24px 24px;
+    transform: rotate(-3deg); transform-origin: right center; pointer-events: none;
+  }
+  .girder-run .barrel {
+    position: absolute; bottom: 24px; width: 30px; height: 30px;
+    background: url("assets/barrel_0.png") no-repeat; background-size: 30px 30px;
+    left: 110%;
+    animation: roll 9s linear 1.2s infinite;
+  }
+  .girder-run .drum {
+    position: absolute; bottom: 24px; left: 12vw; width: 48px; height: 48px;
+    background: url("assets/oil_drum.png") no-repeat; background-size: 48px 48px;
+  }
+  @keyframes roll {
+    0%   { left: 110%; transform: rotate(0turn); }
+    100% { left: 12vw; transform: rotate(-9turn); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .girder-run .barrel { animation: none; left: 60%; }
+    .btn:hover { transform: none; }
+  }
+
+  /* Screens */
+  .screens { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; align-items: start; }
+  .screens figure { margin: 0; }
+  .screens img { border: 3px solid var(--girder-dark); }
+  .screens figcaption { color: var(--dim); font-size: 15px; margin-top: 10px; max-width: 34ch; }
+
+  /* Instruction card — the panel under the cabinet's glass */
+  .card {
+    border: 4px solid var(--ladder); padding: 22px 24px; max-width: 640px;
+    background: linear-gradient(transparent 0 96%, rgba(80,200,255,.08) 96%) 0 0 / 100% 4px;
+  }
+  .card table { border-collapse: collapse; width: 100%; font-size: 16px; }
+  .card th { text-align: left; font-weight: 600; color: var(--ladder); padding: 8px 10px 8px 0; border-bottom: 2px solid var(--girder-dark); }
+  .card td { padding: 10px 10px 10px 0; border-bottom: 1px solid #222; vertical-align: top; }
+  .card tr:last-child td { border-bottom: 0; }
+  .rules { display: grid; grid-template-columns: 56px 1fr; gap: 14px 18px; align-items: center; max-width: 640px; margin-top: 28px; }
+  .rules img { width: 48px; }
+  .rules p { margin: 0; }
+
+  /* Under the hood */
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
+  .split h3 { font-family: var(--display); font-size: 12px; font-weight: 400; color: var(--hammer); margin: 0 0 12px; }
+  .split ul { padding-left: 18px; margin: 0; max-width: 40ch; }
+  .split li { margin-bottom: 8px; }
+
+  pre {
+    background: #0a0a0a; border-left: 6px solid var(--girder); padding: 18px 20px;
+    overflow-x: auto; font-size: 15px; line-height: 1.6; max-width: 640px; margin: 0 0 18px;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  p code { background: #141414; padding: 1px 6px; }
+
+  footer { padding-block: 40px 60px; color: var(--dim); font-size: 15px; border-top: 8px solid transparent; border-image: url("assets/girder.png") 8 / 8px round; }
+  footer p { max-width: 70ch; }
+  .hud { font-family: var(--display); font-size: 10px; color: var(--phosphor); margin-bottom: 26px; display: flex; gap: 28px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="hud" aria-hidden="true"><span>SCORE 000000</span><span>BONUS 5000</span><span>♥♥♥</span></div>
+    <h1>Barrel Climb</h1>
+    <p class="lede">Six sloping girders, a rain of barrels, one hammer and a rescue at the top. An original arcade platformer for your Mac and your iPhone — including the iPhone Duo, folded or open.</p>
+    <div class="actions">
+      <a class="btn" href="https://github.com/vincentlauriat/barrel-climb">Get the source on GitHub</a>
+      <a class="btn secondary" href="#build">Build it in two commands</a>
+    </div>
+    <div class="girder-run" aria-hidden="true"><div class="drum"></div><div class="barrel"></div></div>
+  </section>
+
+  <section>
+    <h2>What it looks like</h2>
+    <div class="screens">
+      <figure>
+        <img class="px" src="assets/iphone.png" alt="The full level on an iPhone: magenta girders, cyan ladders, the ape top-left, the captive on her platform, touch controls at the bottom." width="1206" height="2622">
+        <figcaption>iPhone 17 Pro, touch controls shown. On the Duo the same scene fills whichever screen is open.</figcaption>
+      </figure>
+      <figure>
+        <img class="px" src="assets/title.png" alt="The title screen: Barrel Climb over the level, score and bonus in the top corners." width="1668" height="2420">
+        <figcaption>Title screen on an iPad-sized display — the picture keeps its 7:8 arcade shape and letterboxes the rest.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it plays</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Action</th><th>Mac</th><th>Controller</th><th>iPhone</th></tr></thead>
+        <tbody>
+          <tr><td>Walk, climb</td><td>Arrow keys or WASD</td><td>D-pad or left stick</td><td>Left pad</td></tr>
+          <tr><td>Jump, start</td><td>Space</td><td>A</td><td>Right button</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rules">
+      <img class="px" src="assets/barrel_0.png" alt="" width="10" height="10">
+      <p>Barrels roll down every girder and pick a ladder at random. Jump one for 100 points; touch one and you lose a life.</p>
+      <img class="px" src="assets/hammer.png" alt="" width="10" height="10">
+      <p>Two hammers hang on the way up. Nine seconds of swinging, 300 a barrel — but you can't jump or climb while you hold it.</p>
+      <img class="px" src="assets/fireball_1.png" alt="" width="10" height="12">
+      <p>Every eighth barrel is blue. Let it reach the oil drum and a fireball climbs out to hunt you.</p>
+      <img class="px" src="assets/ladder.png" alt="" width="8" height="8">
+      <p>Ladders are a refuge from barrels while you're on them — except the broken ones, which stop halfway.</p>
+      <img class="px" src="assets/pauline_1.png" alt="" width="16" height="24">
+      <p>Reach the top before the bonus runs out. Then it all starts again, faster.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Under the hood</h2>
+    <div class="split">
+      <div>
+        <h3>The game is a pure function</h3>
+        <ul>
+          <li>The whole simulation is a Swift package with no UI imports — not even a clock.</li>
+          <li>It advances in fixed 1/60 s steps from an input struct and a seeded random source.</li>
+          <li>Every rule above is pinned by one of 70 deterministic tests that run in under a second, no simulator needed.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>The screen just mirrors it</h3>
+        <ul>
+          <li>One SpriteKit scene, 224 × 256 logical points, scaled to fit any screen — that single setting is the entire foldable-phone support.</li>
+          <li>One Xcode target for macOS and iOS, generated from a 70-line YAML file.</li>
+          <li>All sprites and sounds are original and generated by two small Python scripts in the repo.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="build">
+    <h2>Build it</h2>
+    <p>You need Xcode 27 and <a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>. No signing setup, no accounts.</p>
+<pre><code>git clone https://github.com/vincentlauriat/barrel-climb.git
+cd barrel-climb
+make run-mac        # opens the game on your Mac</code></pre>
+    <p>For the iPhone Simulator, <code>make build-ios</code> then install the app from <code>build/DerivedData</code> — the exact commands are in the README. Running on your own iPhone means opening the generated project in Xcode and picking your team.</p>
+<pre><code>make test           # the 70 simulation tests
+make sprites sounds # regenerate the art and audio</code></pre>
+  </section>
+
+  <footer>
+    <p>Barrel Climb is an original work by Vincent Lauriat. It borrows the <em>mechanics</em> of a 1981 arcade classic and nothing else: no Nintendo artwork, sound, level data or names appear anywhere in this project.</p>
+    <p><a href="https://github.com/vincentlauriat/barrel-climb">Source, issues and roadmap on GitHub</a> — next up: the pie factory, the elevators and the rivets.</p>
+  </footer>
+</main>
+</body>
+</html>
