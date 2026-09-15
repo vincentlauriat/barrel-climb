@@ -40,8 +40,12 @@
     font-family: var(--body);
     font-size: 17px;
     line-height: 1.6;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
+  /* The glow behind the screen bleeds past the cabinet on purpose. `clip` contains it
+     without turning the root into a scroll container, which `hidden` on body alone does
+     not do reliably. */
+  html { overflow-x: clip; }
   img { max-width: 100%; height: auto; display: block; }
   .px { image-rendering: pixelated; }
   a { color: var(--ladder); text-underline-offset: 3px; }
