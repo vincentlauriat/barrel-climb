@@ -197,10 +197,10 @@ Direction is `enum Direction { case left, right }`.
 - **Ladder**: if a ladder's x is within ±4 pt and `up` (at bottom) or `down` (at top) is
   pressed, the player snaps to the ladder's x and enters `.climbing`. A broken ladder can
   be climbed only up to its `topY` (which is short of the girder) and then forces a climb
-  down. No jumping from a ladder. Barrels do not hit a player who is on a ladder *below*
-  the girder surface (arcade quirk kept deliberately — it makes ladders a refuge), **except
-  a barrel travelling down that same ladder, which still hits**: the refuge is shelter from
-  the girders above, not from the ladder itself.
+  down. No jumping from a ladder. **A ladder is no shelter**: any barrel or fireball that
+  overlaps the player hits, wherever on a ladder they are. (An earlier revision kept the
+  arcade's ladder refuge; Vincent ruled it out on 2026-09-15 — being on a ladder should
+  never make you safe.)
 - **Hammer**: touching a hammer pickup starts `.hammering` for `hammerDurationSteps`;
   no jumping or climbing while hammering; the hammer hitbox alternates high/low every
   8 steps and destroys barrels/fireballs it touches.
