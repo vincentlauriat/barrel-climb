@@ -4,11 +4,16 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow!
 
+    /// `NSApplication.delegate` is a weak reference, so the delegate — and the window it
+    /// owns — needs an owner that outlives `main()`.
+    private static var retained: AppDelegate?
+
     /// AppKit's default `main()` only calls `NSApplicationMain`, which wires the delegate
     /// through a nib or storyboard. There is none here, so the delegate is set by hand.
     static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()
+        retained = delegate
         app.delegate = delegate
         app.run()
     }

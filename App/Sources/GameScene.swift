@@ -117,7 +117,10 @@ final class GameScene: SKScene {
         for (i, n) in hammerNodes.enumerated() { n.isHidden = world.hammersTaken.contains(i) }
         hud.update(world.game)
         overlay.show(world.game)
-        if world.player.state != .dying, playerNode.action(forKey: "death") != nil {
+        // The death animation runs 1.3 s but `playerDied` lasts `dyingDurationSteps`
+        // (1.5 s), so the action has already finished — and been cleared — by the time
+        // the player respawns. Keying the restore on it left the new life invisible.
+        if world.player.state != .dying, world.player.state != .dead {
             playerNode.removeAction(forKey: "death")
             playerNode.zRotation = 0
             playerNode.alpha = 1
