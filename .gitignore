@@ -24,3 +24,4 @@ PLAN.md
 
 # OMC session state
 .omc/
+__pycache__/
