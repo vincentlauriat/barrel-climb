@@ -9,14 +9,17 @@ options:
 packages:
   DonkeyKongCore:
     path: Core
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.9.1"                          # matches the fleet and Templates/Scripts/release-full.sh
 settings:
   base:
     SWIFT_VERSION: "5.0"                 # app layer: Swift 5 language mode — SpriteKit/GameController are poorly annotated for Swift 6
     SWIFT_STRICT_CONCURRENCY: minimal    # Core/ stays in Swift 6 mode via its tools-version
     CODE_SIGN_STYLE: Automatic
     CODE_SIGNING_ALLOWED: "NO"
-    PRODUCT_NAME: DonkeyKong
-    MARKETING_VERSION: "0.1.0"
+    PRODUCT_NAME: Barrel Climb
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     GENERATE_INFOPLIST_FILE: "NO"
@@ -41,6 +44,8 @@ targets:
       - package: DonkeyKongCore
       - sdk: SpriteKit.framework
       - sdk: GameController.framework
+      - package: Sparkle                   # Sparkle declares platforms: [.macOS] — an iOS
+        destinationFilters: [macOS]        # destination cannot even resolve it
     info:
       path: App/Info.plist
       properties:
@@ -48,6 +53,13 @@ targets:
         CFBundleName: Barrel Climb
         CFBundleShortVersionString: $(MARKETING_VERSION)
         LSApplicationCategoryType: public.app-category.arcade-games
+        # Sparkle (macOS only; iOS ignores these keys). The appcast rides on the same
+        # GitHub Pages site as the landing page, served from main:/docs.
+        SUFeedURL: "https://vincentlauriat.github.io/barrel-climb/appcast.xml"
+        SUPublicEDKey: "ZHNhjzBxHMkQSm/fnMFJ0uQkwH7U7wymROlaOKg0kMA="
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUAutomaticallyUpdate: false
         NSHighResolutionCapable: true
         UILaunchScreen: {}
         UIStatusBarHidden: true

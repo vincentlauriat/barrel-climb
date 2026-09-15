@@ -1,4 +1,5 @@
 import AppKit
+import Sparkle
 
 @main
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -7,6 +8,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// `NSApplication.delegate` is a weak reference, so the delegate — and the window it
     /// owns — needs an owner that outlives `main()`.
     private static var retained: AppDelegate?
+
+    /// Sparkle's standard controller starts the updater itself and owns the whole update
+    /// flow. This file only builds for the macOS destination — Sparkle declares
+    /// `platforms: [.macOS]`, so `project.yml` filters the package the same way.
+    private let updater = SPUStandardUpdaterController(
+        startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
     /// AppKit's default `main()` only calls `NSApplicationMain`, which wires the delegate
     /// through a nib or storyboard. There is none here, so the delegate is set by hand.
@@ -39,6 +46,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         let app = NSMenuItem(); menu.addItem(app)
         let sub = NSMenu()
+        let check = NSMenuItem(
+            title: "Check for Updates…", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: "")
+        check.target = updater
+        sub.addItem(check)
+        sub.addItem(.separator())
         sub.addItem(withTitle: "Quit Barrel Climb", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         app.submenu = sub
         NSApp.mainMenu = menu

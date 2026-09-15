@@ -16,7 +16,7 @@ build-ios: generate
 	$(XCODEBUILD) -destination 'generic/platform=iOS Simulator' -derivedDataPath $(DERIVED) build
 
 run-mac: build-mac
-	open $(DERIVED)/Build/Products/Debug/DonkeyKong.app
+	open "$(DERIVED)/Build/Products/Debug/Barrel Climb.app"
 
 lint:
 	swift format lint --recursive --strict Core App

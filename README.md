@@ -62,9 +62,13 @@ make run-mac
 For the iPhone Simulator, `make build-ios` then install the built app:
 
 ```sh
-xcrun simctl install booted build/DerivedData/Build/Products/Debug-iphonesimulator/DonkeyKong.app
+xcrun simctl install booted build/DerivedData/Build/Products/Debug-iphonesimulator/'Barrel Climb.app'
 xcrun simctl launch booted fr.lauriat.DonkeyKong
 ```
+
+A signed, notarized Mac build ships as a DMG on the
+[releases page](https://github.com/vincentlauriat/barrel-climb/releases), and updates
+itself through Sparkle — there is a Check for Updates item in the Barrel Climb menu.
 
 Running on your own iPhone means opening the generated `DonkeyKong.xcodeproj` in Xcode and
 picking your team under Signing & Capabilities.

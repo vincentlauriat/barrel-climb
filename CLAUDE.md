@@ -47,6 +47,19 @@ make sounds      # regenerate App/Resources/sounds from Tools/gen_sounds.py
 make icon        # regenerate the AppIcon.appiconset from Tools/gen_icon.py
 ```
 
+Releasing the Mac build:
+
+```sh
+./Scripts/release.sh 1.0.0   # build, Developer ID sign, notarize, staple, DMG, appcast
+```
+
+Bump `MARKETING_VERSION` **and** `CURRENT_PROJECT_VERSION` in `project.yml` first: Sparkle
+compares the appcast's `sparkle:version` against the installed app's `CFBundleVersion`, not
+against the marketing string, so two releases sharing a build number leave every install
+convinced it is up to date. The EdDSA key lives in the login keychain under the account
+`BarrelClimb` and must never be regenerated. Both steps need an unlocked Mac: notarytool
+reads its keychain profile and `sign_update` puts up an authorization panel the first time.
+
 Single core test (regex over `Target.Suite/test`):
 
 ```sh

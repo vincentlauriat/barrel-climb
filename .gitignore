@@ -25,3 +25,9 @@ PLAN.md
 # OMC session state
 .omc/
 __pycache__/
+
+# Release artefacts and the Sparkle CLI tools (fetched on demand)
+release/
+*.dmg
+*.zip
+.sparkle-tools/

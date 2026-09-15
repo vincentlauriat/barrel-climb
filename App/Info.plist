@@ -26,6 +26,16 @@
 	<string>public.app-category.arcade-games</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://vincentlauriat.github.io/barrel-climb/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>ZHNhjzBxHMkQSm/fnMFJ0uQkwH7U7wymROlaOKg0kMA=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
