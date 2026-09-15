@@ -100,6 +100,38 @@ APP="$ROOT/build/DerivedData/Build/Products/Release/$APP_NAME.app"
 BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP/Contents/Info.plist")
 echo "→ Built $APP_NAME $VERSION (CFBundleVersion $BUILD_NUMBER)"
 
+# A framework can sit in Contents/Frameworks and still be unreachable: XcodeGen gives a
+# multi-destination app the iOS runpath (@executable_path/Frameworks) only, which points
+# one level below where macOS keeps its frameworks. The bundle then dies at launch with
+# "Library not loaded: @rpath/Sparkle.framework/…" — a failure no build, codesign or
+# notarisation step reports. Resolve every @rpath dependency here instead.
+echo "→ Checking @rpath dependencies resolve inside the bundle"
+check_rpaths() {
+  # Paths here contain spaces ("Barrel Climb.debug.dylib"), so every list is read
+  # line by line rather than word-split.
+  local bin="$1" dir dep rp candidate resolved
+  dir=$(dirname "$bin")
+  local -a rpaths=()
+  while IFS= read -r rp; do
+    [ -n "$rp" ] && rpaths+=("$rp")
+  done < <(otool -l "$bin" | awk '/LC_RPATH/{f=1} f&&/^ *path /{sub(/^ *path /,""); sub(/ \(offset.*/,""); print; f=0}')
+  while IFS= read -r dep; do
+    [ -n "$dep" ] || continue
+    resolved=""
+    for rp in "${rpaths[@]}"; do
+      candidate="${dep/@rpath/$rp}"
+      candidate="${candidate//@executable_path/$dir}"
+      candidate="${candidate//@loader_path/$dir}"
+      [ -f "$candidate" ] && { resolved="$candidate"; break; }
+    done
+    [ -n "$resolved" ] || { echo "✗ $dep cannot be resolved from $(basename "$bin") — the app would crash at launch" >&2; return 1; }
+  done < <(otool -L "$bin" | awk '/@rpath\//{sub(/ \(compatibility.*/,""); sub(/^\t/,""); print}')
+}
+check_rpaths "$APP/Contents/MacOS/$APP_NAME"
+for dylib in "$APP/Contents/MacOS/"*.dylib; do
+  [ -f "$dylib" ] && check_rpaths "$dylib"
+done
+
 # ---------------------------------------------------------------- 3. sign
 
 STAGING_DIR="$(mktemp -d)"
