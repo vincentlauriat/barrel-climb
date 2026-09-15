@@ -84,18 +84,26 @@ final class CollisionTests: XCTestCase {
         XCTAssertEqual(w.barrels.count, 1)
         XCTAssertFalse(e.contains { if case .hammerHit = $0 { return true } else { return false } })
     }
+    /// Hammers no longer sit on a ladder (see `LadderReachabilityTests`), so the overlap is
+    /// staged directly: a climbing player who touches one keeps climbing and only starts
+    /// swinging once back on a girder.
     func testHammerPickedWhileClimbingTakesEffectOnArrival() {
         var w = World.playing()
-        w.player.position = Vector2(x: 176, y: level.girders[2].surfaceY(at: 176)); w.player.currentGirder = 2
-        w.run(100, .up)  // enters ladder 4 (176, girder 2 → 3) and climbs it fully, picking up hammer 1 en route
-        XCTAssertEqual(w.hammersTaken, [1])
-        XCTAssertEqual(w.player.state, .hammering)
+        let ladder = level.ladders[8]
+        w.player.state = .climbing
+        w.player.currentLadder = 8
+        w.player.currentGirder = nil
+        w.player.position = Vector2(x: ladder.x, y: level.hammers[0].y)
+        w.player.position.x = level.hammers[0].x
+        w.run(1)
+        XCTAssertEqual(w.hammersTaken, [0])
+        XCTAssertEqual(w.player.state, .climbing)  // the climb is not interrupted
         XCTAssertGreaterThan(w.player.hammerStepsRemaining, 0)
+        w.player.position.x = ladder.x
         w.run(1, .jump)
-        XCTAssertEqual(w.player.state, .hammering)  // no jump while hammering
-        // No ladder starts at x = 176 on girder 3 (the only nearby ladder there is at x = 192,
-        // lower girder 3), so a fresh climb attempt here has nothing to refuse into — skipped.
-        XCTAssertNil(level.ladders.first { $0.x == 176 && $0.lowerGirder == 3 })
+        XCTAssertEqual(w.player.state, .climbing)  // no jump off a ladder
+        w.run(400, .down)  // back down to the lower girder
+        XCTAssertEqual(w.player.state, .hammering)  // takes effect on arrival
     }
     func testJumpingIntoAHammerPicksItUpOnLanding() {
         var w = World.playing()
@@ -114,11 +122,44 @@ final class CollisionTests: XCTestCase {
     }
     func testWalkingIntoAHammerPicksItUp() {
         var w = World.playing()
-        w.player.position = Vector2(x: 12, y: level.girders[4].surfaceY(at: 12)); w.player.currentGirder = 4
+        let start = level.hammers[0].x - 20
+        w.player.position = Vector2(x: start, y: level.girders[4].surfaceY(at: start))
+        w.player.currentGirder = 4
         w.run(60, .right)
         XCTAssertEqual(w.hammersTaken, [0])
         XCTAssertEqual(w.player.state, .hammering)
     }
+    /// The ladder refuge shelters from the girders above, not from the ladder itself.
+    private func climbingMidLadder(_ li: Int) -> World {
+        var w = World.playing()
+        let l = level.ladders[li]
+        w.player.state = .climbing
+        w.player.currentLadder = li
+        w.player.currentGirder = nil
+        w.player.position = Vector2(x: l.x, y: l.bottomY + 8)
+        return w
+    }
+
+    func testBarrelComingDownTheSameLadderHitsTheClimbingPlayer() {
+        var w = climbingMidLadder(2)
+        w.barrels.append(
+            Barrel(
+                id: 1, kind: .normal, state: .onLadder, position: w.player.position,
+                direction: .right, currentGirder: nil, currentLadder: 2))
+        w.run(1)
+        XCTAssertEqual(w.game.phase, .playerDied)
+    }
+
+    func testBarrelOnAnotherLadderLeavesTheClimbingPlayerAlone() {
+        var w = climbingMidLadder(2)
+        w.barrels.append(
+            Barrel(
+                id: 1, kind: .normal, state: .onLadder, position: w.player.position,
+                direction: .right, currentGirder: nil, currentLadder: 5))
+        w.run(1)
+        XCTAssertEqual(w.game.phase, .playing)
+    }
+
     func testHammerDestroysBarrelsAndFireballs() {
         var w = World.playing()
         w.player.state = .hammering; w.player.hammerStepsRemaining = 200; w.player.facing = .right

@@ -81,9 +81,11 @@ public enum Levels {
             kongPosition: Vector2(x: 40, y: g[6].surfaceY(at: 40)),
             paulinePosition: Vector2(x: 88, y: 232),
             goal: Rect(origin: Vector2(x: 72, y: 232), size: Vector2(x: 32, y: 20)),
+            // Kept clear of every ladder foot on their girder: a hammer picked up there
+            // would block the climb it sits on for the whole hammer duration.
             hammers: [
-                Vector2(x: 24, y: g[4].surfaceY(at: 24) + hammerY),
-                Vector2(x: 176, y: g[2].surfaceY(at: 176) + hammerY),
+                Vector2(x: 96, y: g[4].surfaceY(at: 96) + hammerY),
+                Vector2(x: 144, y: g[2].surfaceY(at: 144) + hammerY),
             ],
             oilDrum: Rect(origin: Vector2(x: 2, y: 8), size: Vector2(x: 14, y: 16)),
             barrelSpawn: Vector2(x: 60, y: g[6].surfaceY(at: 60))
