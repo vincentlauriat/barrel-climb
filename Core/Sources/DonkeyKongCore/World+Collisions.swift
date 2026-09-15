@@ -20,7 +20,11 @@ extension World {
         }
     }
 
+    /// Only the hammer's own animation state swings it — a held hammer that is climbing or
+    /// jumping (impossible mid-air/mid-ladder in normal play, but reachable via a stale
+    /// `hammerStepsRemaining`) must not invisibly kill barrels while the sprite shows otherwise.
     private mutating func swingHammer() {
+        guard player.state == .hammering else { return }
         let head = player.hammerBounds(step: game.phaseSteps)
         var i = 0
         while i < barrels.count {
@@ -62,12 +66,16 @@ extension World {
     }
 
     /// Barrels do not hit a player who is on a ladder below the upper girder's surface — a
-    /// deliberate refuge. Fireballs are not affected: they can enter ladders themselves.
+    /// deliberate refuge. It only applies once actually above the ladder's foot: sitting at
+    /// `bottomY` (having just entered, or about to leave) is still on the lower girder's level
+    /// and must not grant permanent immunity there. Fireballs are not affected: they can enter
+    /// ladders themselves.
     private func hazardTouchesPlayer() -> Bool {
         let p = player.bounds
         if player.state == .climbing, let li = player.currentLadder {
-            let top = level.girders[level.ladders[li].upperGirder].surfaceY(at: player.position.x)
-            if player.position.y < top {
+            let ladder = level.ladders[li]
+            let top = level.girders[ladder.upperGirder].surfaceY(at: player.position.x)
+            if player.position.y > ladder.bottomY, player.position.y < top {
                 return fireballs.contains { $0.bounds.intersects(p) }
             }
         }

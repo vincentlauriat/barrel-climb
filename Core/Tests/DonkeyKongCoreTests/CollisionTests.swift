@@ -58,6 +58,32 @@ final class CollisionTests: XCTestCase {
         w.run(1)
         XCTAssertEqual(w.player.state, .dying)
     }
+    func testLadderFootIsNotARefuge() {
+        var w = World.playing()
+        w.player.position = Vector2(x: 184, y: level.ladders[0].bottomY); w.player.state = .climbing
+        w.player.currentLadder = 0; w.player.currentGirder = nil
+        w.barrels.append(
+            Barrel(
+                id: 1, kind: .normal, position: Vector2(x: 184, y: level.girders[1].surfaceY(at: 184)),
+                direction: .right, currentGirder: 1))
+        w.run(1)
+        XCTAssertEqual(w.player.state, .dying)  // sitting at the foot is still on the lower girder's level
+    }
+    func testHammerDoesNotSwingWhileClimbing() {
+        var w = World.playing()
+        w.player.position = Vector2(x: 184, y: 25); w.player.state = .climbing
+        w.player.currentLadder = 0; w.player.currentGirder = nil
+        w.player.hammerStepsRemaining = 200; w.player.facing = .right
+        // Sits where `hammerBounds(step:)` would place the (inactive) swing head for this
+        // position/facing at the first step — well clear of the player's own hitbox.
+        w.barrels.append(
+            Barrel(
+                id: 1, kind: .normal, position: Vector2(x: 195, y: level.girders[2].surfaceY(at: 195)),
+                direction: .right, currentGirder: 2))
+        let e = w.run(Tuning.hammerSwingPeriodSteps * 2)
+        XCTAssertEqual(w.barrels.count, 1)
+        XCTAssertFalse(e.contains { if case .hammerHit = $0 { return true } else { return false } })
+    }
     func testHammerPickedWhileClimbingTakesEffectOnArrival() {
         var w = World.playing()
         w.player.position = Vector2(x: 176, y: level.girders[2].surfaceY(at: 176)); w.player.currentGirder = 2
