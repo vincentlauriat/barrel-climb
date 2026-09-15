@@ -4,6 +4,15 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow!
 
+    /// AppKit's default `main()` only calls `NSApplicationMain`, which wires the delegate
+    /// through a nib or storyboard. There is none here, so the delegate is set by hand.
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+        app.run()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         let controller = MacGameViewController()
         window = NSWindow(contentViewController: controller)
