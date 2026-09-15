@@ -21,10 +21,14 @@ final class IOSGameViewController: UIViewController {
             overlay.topAnchor.constraint(equalTo: view.topAnchor),
             overlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        overlay.isHidden = scene.controllerInput?.isConnected ?? false
-        scene.controllerInput?.onConnectionChange = { [weak self] connected in
-            self?.overlay.isHidden = connected
-        }
+        // The iOS Simulator advertises a phantom MFi controller at launch, which would hide the
+        // touch overlay with no real controller present. Real devices keep the auto-hide.
+        #if !targetEnvironment(simulator)
+            overlay.isHidden = scene.controllerInput?.isConnected ?? false
+            scene.controllerInput?.onConnectionChange = { [weak self] connected in
+                self?.overlay.isHidden = connected
+            }
+        #endif
     }
 
     override var prefersStatusBarHidden: Bool { true }

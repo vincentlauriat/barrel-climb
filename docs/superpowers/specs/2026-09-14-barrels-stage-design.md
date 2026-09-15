@@ -173,7 +173,7 @@ Direction is `enum Direction { case left, right }`.
 | `walkSpeed` | 40 pt/s | |
 | `climbSpeed` | 30 pt/s | |
 | `jumpDurationSteps` | 30 (0.5 s) | fixed parabola, horizontal speed = walk speed if a direction is held |
-| `jumpHeight` | 12 pt | just clears a 10 pt barrel |
+| `jumpHeight` | 16 pt | clears a 10 pt barrel (12 pt made barrels unjumpable — see Deviations) |
 | `gravity` | 300 pt/s² | only for falling barrels / falling player death |
 | `barrelSpeed` | 45 pt/s | ×(1 + 0.1·loop) |
 | `barrelLadderChance` | 1/4 | evaluated once per ladder top |
@@ -202,11 +202,13 @@ Direction is `enum Direction { case left, right }`.
 - **Hammer**: touching a hammer pickup starts `.hammering` for `hammerDurationSteps`;
   no jumping or climbing while hammering; the hammer hitbox alternates high/low every
   8 steps and destroys barrels/fireballs it touches.
-- **Death**: AABB overlap with a barrel/fireball (not hammering), a fall of more than one
-  girder height, or `bonus == 0`. `.dying` lasts 90 steps, then `lives -= 1`; `.playerDied`
-  phase resets the level (barrels cleared) or transitions to `.gameOver` at 0 lives.
-- **Goal**: player AABB intersects `level.goal` → `.levelCleared`, bonus added to score,
-  `loop += 1`, level restarts with faster barrels/Kong.
+- **Death**: AABB overlap with a barrel/fireball — including while hammering, see
+  Deviations — a fall of more than one girder height, or `bonus == 0`. `.dying` lasts
+  90 steps, then `lives -= 1`; `.playerDied` phase resets the level (barrels cleared) or
+  transitions to `.gameOver` at 0 lives.
+- **Goal**: player AABB intersects `level.goal` **and the player has left any ladder**
+  (see Deviations) → `.levelCleared`, bonus added to score, `loop += 1`, level restarts
+  with faster barrels/Kong.
 
 ### Barrel rules
 
@@ -302,6 +304,31 @@ blue ×4), fireball ×2, Kong (idle, throw), Pauline ×2, hammer, oil drum, gird
 ladder tile, broken-ladder tile. Deterministic output, committed; regenerate with
 `make sprites`. Sounds are short `.wav` files synthesized by `Tools/gen_sounds.py`
 (square-wave beeps), also committed.
+
+## Deviations recorded during implementation (2026-09-15)
+
+- `jumpHeightPoints` is **16 pt**, not 12: at 12 pt the jump could not clear a 10 pt
+  barrel in practice.
+- Collision hitboxes are narrower than the sprites they represent, so barrels stay
+  jumpable: player 6 × 14, barrel 6 × 8, fireball 6 × 10.
+- `hammerHeightAboveGirderPoints` is **16 pt**, not 22: at 22 the pickup box only
+  overlapped a jumping player, never one walking underneath it.
+- `UIRequiresFullScreen` was dropped from the Info.plist properties — the key is
+  deprecated on iOS 26.
+- The App layer compiles in the Swift 5 language mode (SpriteKit/GameController are not
+  yet annotated for Swift 6 concurrency checking); `Core` compiles in Swift 6.
+- The touch overlay splits the screen into left/right halves for the d-pad and jump
+  button, not thirds.
+- Sounds are synthesized as `.wav` files, not `.caf`.
+- **A hammering player is not immune to hazards** — a barrel that reaches him from
+  behind (or from any direction the swinging head is not currently covering) still
+  kills; only the swinging hammer head itself destroys what it touches. This supersedes
+  the "(not hammering)" qualifier in the death rule below: making hammering an
+  invulnerability window would turn it into a 9-second free pass, and the swing already
+  clears anything directly in front. Vincent to confirm this reading is intended.
+- Reaching the goal also requires `player.currentLadder == nil` — arriving at the goal
+  rectangle while still on the final ladder no longer clears the level; the player must
+  actually step off onto the girder first.
 
 ## Testing
 

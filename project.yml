@@ -46,6 +46,7 @@ targets:
       properties:
         CFBundleDisplayName: Barrel Climb
         CFBundleName: Barrel Climb
+        CFBundleShortVersionString: $(MARKETING_VERSION)
         LSApplicationCategoryType: public.app-category.arcade-games
         NSHighResolutionCapable: true
         UILaunchScreen: {}
