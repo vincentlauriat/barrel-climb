@@ -134,7 +134,9 @@
   .devices { display: grid; gap: 34px; grid-template-columns: 1fr; }
   @media (min-width: 760px) { .devices { grid-template-columns: 1fr 1fr; align-items: start; } }
   figure { margin: 0; }
-  figure img { border: 2px solid var(--girder-deep); }
+  /* The captures are whole devices, so mostly letterbox black: bound their height or they
+     swamp the page. */
+  figure img { border: 2px solid var(--girder-deep); max-height: 460px; width: auto; }
   figcaption { color: var(--mute); font-size: 15px; margin-top: 14px; max-width: 40ch; }
 
   /* Under the hood */
