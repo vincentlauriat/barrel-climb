@@ -66,9 +66,10 @@ xcrun simctl install booted build/DerivedData/Build/Products/Debug-iphonesimulat
 xcrun simctl launch booted fr.lauriat.DonkeyKong
 ```
 
-A signed, notarized Mac build ships as a DMG on the
-[releases page](https://github.com/vincentlauriat/barrel-climb/releases), and updates
-itself through Sparkle — there is a Check for Updates item in the Barrel Climb menu.
+The Mac build carries Sparkle, so it keeps itself up to date — there is a Check for
+Updates item in the Barrel Climb menu. The signed, notarized DMG will appear on the
+[releases page](https://github.com/vincentlauriat/barrel-climb/releases); v1.0.0 has not
+shipped yet.
 
 Running on your own iPhone means opening the generated `DonkeyKong.xcodeproj` in Xcode and
 picking your team under Signing & Capabilities.

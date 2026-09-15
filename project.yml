@@ -77,5 +77,10 @@ targets:
       base:
         INFOPLIST_FILE: App/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
+        # XcodeGen gives a multi-destination app the iOS runpath only
+        # (@executable_path/Frameworks). A macOS bundle keeps its frameworks in
+        # Contents/Frameworks, one level above the executable, so Sparkle fails to
+        # load at launch without this SDK-conditional override.
+        LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]: "@executable_path/../Frameworks @loader_path/../Frameworks"
     scheme:
       testTargets: []

@@ -100,6 +100,40 @@ APP="$ROOT/build/DerivedData/Build/Products/Release/$APP_NAME.app"
 BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP/Contents/Info.plist")
 echo "→ Built $APP_NAME $VERSION (CFBundleVersion $BUILD_NUMBER)"
 
+# A framework can sit in Contents/Frameworks and still be unreachable: XcodeGen gives a
+# multi-destination app the iOS runpath (@executable_path/Frameworks) only, which points
+# one level below where macOS keeps its frameworks. The bundle then dies at launch with
+# "Library not loaded: @rpath/Sparkle.framework/…" — a failure no build, codesign or
+# notarisation step reports. Resolve every @rpath dependency here instead.
+echo "→ Checking @rpath dependencies resolve inside the bundle"
+check_rpaths() {
+  # Paths here contain spaces ("Barrel Climb.debug.dylib"), so every list is read
+  # line by line rather than word-split.
+  local bin="$1" dir dep rp candidate resolved
+  dir=$(dirname "$bin")
+  local -a rpaths=()
+  while IFS= read -r rp; do
+    [ -n "$rp" ] && rpaths+=("$rp")
+  done < <(otool -l "$bin" | awk '/LC_RPATH/{f=1} f&&/^ *path /{sub(/^ *path /,""); sub(/ \(offset.*/,""); print; f=0}')
+  while IFS= read -r dep; do
+    [ -n "$dep" ] || continue
+    resolved=""
+    for rp in "${rpaths[@]}"; do
+      candidate="${dep/@rpath/$rp}"
+      candidate="${candidate//@executable_path/$dir}"
+      candidate="${candidate//@loader_path/$dir}"
+      [ -f "$candidate" ] && { resolved="$candidate"; break; }
+    done
+    [ -n "$resolved" ] || { echo "✗ $dep cannot be resolved from $(basename "$bin") — the app would crash at launch" >&2; return 1; }
+  done < <(otool -L "$bin" | awk '/@rpath\//{sub(/ \(compatibility.*/,""); sub(/^\t/,""); print}')
+}
+check_rpaths "$APP/Contents/MacOS/$APP_NAME"
+for dylib in "$APP/Contents/MacOS/"*.dylib; do
+  # An unmatched glob stays literal; skipping it must not trip `set -e`.
+  [ -f "$dylib" ] || continue
+  check_rpaths "$dylib"
+done
+
 # ---------------------------------------------------------------- 3. sign
 
 STAGING_DIR="$(mktemp -d)"
@@ -157,6 +191,16 @@ echo "→ Creating $DMG"
 hdiutil create -volname "$APP_NAME $VERSION" -srcfolder "$LAYOUT" \
   -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$DMG" >/dev/null
 
+# Sign the disk image itself, not only the app inside it. Notarisation alone leaves the
+# DMG without a signature of its own; signing must happen before the submission, since a
+# later signature would invalidate the stapled ticket.
+echo "→ Codesigning the disk image"
+for attempt in 1 2 3 4 5; do
+  codesign --force --timestamp --sign "$SIGNING_IDENTITY" "$DMG" && break
+  [ "$attempt" -lt 5 ] || { echo "✗ codesign of the DMG failed after 5 attempts" >&2; exit 1; }
+  echo "  ↻ codesign failed ($attempt/5), retrying in 5s…"; sleep 5
+done
+
 # ---------------------------------------------------------------- 5. notarize
 
 if [ "${SKIP_NOTARIZE:-0}" = "1" ]; then
@@ -169,8 +213,20 @@ else
   xcrun stapler staple "$DMG"
   xcrun stapler validate "$DMG"
 
-  # Independent check: do not trust the steps above having printed success.
-  spctl -a -t open --context context:primary-signature -vv "$DMG"
+  # Independent check: do not trust the steps above having printed success. What matters is
+  # the verdict on the app a user drags out, so mount the image and ask about the app —
+  # `spctl` on the DMG answers a different question and stays silent about the payload.
+  echo "→ Verifying the app inside the image"
+  VERIFY_MNT="$STAGING_DIR/verify"
+  mkdir -p "$VERIFY_MNT"
+  hdiutil attach "$DMG" -nobrowse -readonly -mountpoint "$VERIFY_MNT" >/dev/null
+  VERDICT=$(spctl -a -t exec -vv "$VERIFY_MNT/$APP_NAME.app" 2>&1 || true)
+  hdiutil detach "$VERIFY_MNT" >/dev/null
+  echo "$VERDICT"
+  case "$VERDICT" in
+    *"source=Notarized Developer ID"*) ;;
+    *) echo "✗ Gatekeeper would not accept the shipped app" >&2; exit 1 ;;
+  esac
 fi
 
 # ---------------------------------------------------------------- 6. appcast
