@@ -191,6 +191,16 @@ echo "→ Creating $DMG"
 hdiutil create -volname "$APP_NAME $VERSION" -srcfolder "$LAYOUT" \
   -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$DMG" >/dev/null
 
+# Sign the disk image itself, not only the app inside it. Notarisation alone leaves the
+# DMG without a signature of its own; signing must happen before the submission, since a
+# later signature would invalidate the stapled ticket.
+echo "→ Codesigning the disk image"
+for attempt in 1 2 3 4 5; do
+  codesign --force --timestamp --sign "$SIGNING_IDENTITY" "$DMG" && break
+  [ "$attempt" -lt 5 ] || { echo "✗ codesign of the DMG failed after 5 attempts" >&2; exit 1; }
+  echo "  ↻ codesign failed ($attempt/5), retrying in 5s…"; sleep 5
+done
+
 # ---------------------------------------------------------------- 5. notarize
 
 if [ "${SKIP_NOTARIZE:-0}" = "1" ]; then
@@ -203,8 +213,20 @@ else
   xcrun stapler staple "$DMG"
   xcrun stapler validate "$DMG"
 
-  # Independent check: do not trust the steps above having printed success.
-  spctl -a -t open --context context:primary-signature -vv "$DMG"
+  # Independent check: do not trust the steps above having printed success. What matters is
+  # the verdict on the app a user drags out, so mount the image and ask about the app —
+  # `spctl` on the DMG answers a different question and stays silent about the payload.
+  echo "→ Verifying the app inside the image"
+  VERIFY_MNT="$STAGING_DIR/verify"
+  mkdir -p "$VERIFY_MNT"
+  hdiutil attach "$DMG" -nobrowse -readonly -mountpoint "$VERIFY_MNT" >/dev/null
+  VERDICT=$(spctl -a -t exec -vv "$VERIFY_MNT/$APP_NAME.app" 2>&1 || true)
+  hdiutil detach "$VERIFY_MNT" >/dev/null
+  echo "$VERDICT"
+  case "$VERDICT" in
+    *"source=Notarized Developer ID"*) ;;
+    *) echo "✗ Gatekeeper would not accept the shipped app" >&2; exit 1 ;;
+  esac
 fi
 
 # ---------------------------------------------------------------- 6. appcast
