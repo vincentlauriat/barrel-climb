@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Sub-project 1 implemented on branch `feat/barrels-stage` (2026-09-15): the barrels
-stage is playable on macOS and iOS; `Core/` holds 64 deterministic tests. Next
-sub-projects: pie factory, elevators, rivets. Re-run `/init` to refresh this file from
-the real tree once the branch is merged.
+Sub-project 1 is merged on `main` (2026-09-15): the barrels stage is playable on
+macOS and iOS, `Core/` holds 76 deterministic tests, and the app ships a generated
+icon for the Dock and both iOS home screens. Published at
+https://github.com/vincentlauriat/barrel-climb with a landing page on GitHub Pages
+(`main:/docs`). Next sub-projects: pie factory, elevators, rivets.
 
 ## What this is
 
