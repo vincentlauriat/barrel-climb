@@ -129,7 +129,9 @@ check_rpaths() {
 }
 check_rpaths "$APP/Contents/MacOS/$APP_NAME"
 for dylib in "$APP/Contents/MacOS/"*.dylib; do
-  [ -f "$dylib" ] && check_rpaths "$dylib"
+  # An unmatched glob stays literal; skipping it must not trip `set -e`.
+  [ -f "$dylib" ] || continue
+  check_rpaths "$dylib"
 done
 
 # ---------------------------------------------------------------- 3. sign
