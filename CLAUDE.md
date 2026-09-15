@@ -43,6 +43,7 @@ make run-mac     # build-mac, then open the .app
 make lint        # swift format lint --recursive --strict Core App
 make sprites     # regenerate App/Resources/sprites from Tools/gen_sprites.py
 make sounds      # regenerate App/Resources/sounds from Tools/gen_sounds.py
+make icon        # regenerate the AppIcon.appiconset from Tools/gen_icon.py
 ```
 
 Single core test (regex over `Target.Suite/test`):
@@ -89,7 +90,7 @@ Core/Tests/DonkeyKongCoreTests/ mirrors the source file names
 App/Sources/                   shared macOS + iOS SpriteKit code
 App/Platform/{macOS,iOS}/      thin shells: window/scene delegates, keyboard, touch overlay
 App/Resources/                 sprites/*.png (generated), sounds/*.wav (generated)
-Tools/                         gen_sprites.py, gen_sounds.py — stdlib only, deterministic
+Tools/                         gen_sprites.py, gen_sounds.py, gen_icon.py — stdlib only, deterministic
 docs/superpowers/specs/        design specs, one per sub-project
 ```
 
