@@ -1,0 +1,69 @@
+name: DonkeyKong
+options:
+  bundleIdPrefix: fr.lauriat
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "26.0"
+  xcodeVersion: "27.0"
+  createIntermediateGroups: true
+packages:
+  DonkeyKongCore:
+    path: Core
+settings:
+  base:
+    SWIFT_VERSION: "5.0"                 # app layer: Swift 5 language mode — SpriteKit/GameController are poorly annotated for Swift 6
+    SWIFT_STRICT_CONCURRENCY: minimal    # Core/ stays in Swift 6 mode via its tools-version
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGNING_ALLOWED: "NO"
+    PRODUCT_NAME: DonkeyKong
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    GENERATE_INFOPLIST_FILE: "NO"
+targets:
+  DonkeyKong:
+    type: application
+    supportedDestinations: [macOS, iOS]
+    sources:
+      - path: App/Sources
+      - path: App/Platform/macOS
+        destinationFilters: [macOS]
+      - path: App/Platform/iOS
+        destinationFilters: [iOS]
+      - path: App/Resources/Assets.xcassets
+      - path: App/Resources/sprites
+        type: folder
+        buildPhase: resources
+      - path: App/Resources/sounds
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: DonkeyKongCore
+      - sdk: SpriteKit.framework
+      - sdk: GameController.framework
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Barrel Climb
+        CFBundleName: Barrel Climb
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        LSApplicationCategoryType: public.app-category.arcade-games
+        NSHighResolutionCapable: true
+        UILaunchScreen: {}
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown]
+        GCSupportsControllerUserInteraction: true
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+    settings:
+      base:
+        INFOPLIST_FILE: App/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+    scheme:
+      testTargets: []

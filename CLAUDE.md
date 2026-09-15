@@ -4,11 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design approved, implementation not started (2026-09-14). The tree holds the spec and
-tracking docs only. Everything below is the *agreed target shape* from
-`docs/superpowers/specs/2026-09-14-barrels-stage-design.md` — read that spec before
-touching anything; it is the source of truth for types, constants and rules. Re-run
-`/init` once the first modules land.
+Sub-project 1 implemented on branch `feat/barrels-stage` (2026-09-15): the barrels
+stage is playable on macOS and iOS; `Core/` holds 64 deterministic tests. Next
+sub-projects: pie factory, elevators, rivets. Re-run `/init` to refresh this file from
+the real tree once the branch is merged.
 
 ## What this is
 
@@ -43,6 +42,7 @@ make build-ios   # xcodebuild … -destination 'generic/platform=iOS Simulator' 
 make run-mac     # build-mac, then open the .app
 make lint        # swift format lint --recursive --strict Core App
 make sprites     # regenerate App/Resources/sprites from Tools/gen_sprites.py
+make sounds      # regenerate App/Resources/sounds from Tools/gen_sounds.py
 ```
 
 Single core test (regex over `Target.Suite/test`):
@@ -88,7 +88,7 @@ Core/Sources/DonkeyKongCore/   simulation — group by concept (Player, Barrel, 
 Core/Tests/DonkeyKongCoreTests/ mirrors the source file names
 App/Sources/                   shared macOS + iOS SpriteKit code
 App/Platform/{macOS,iOS}/      thin shells: window/scene delegates, keyboard, touch overlay
-App/Resources/                 sprites/*.png (generated), sounds/*.caf (generated)
+App/Resources/                 sprites/*.png (generated), sounds/*.wav (generated)
 Tools/                         gen_sprites.py, gen_sounds.py — stdlib only, deterministic
 docs/superpowers/specs/        design specs, one per sub-project
 ```
