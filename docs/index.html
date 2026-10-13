@@ -1,336 +1,53 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" style="--accent:#fa50c8;--on-accent:#141414;--accent-ink:#cc0692">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Barrel Climb</title>
 <meta name="description" content="An original arcade platformer for macOS and iOS, including the iPhone Duo. Six girders, a rain of barrels, two hammers. Open source, with a deterministic Swift core.">
+<meta name="theme-color" content="#eff1f2">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Barrel Climb">
-<meta property="og:description" content="An original arcade platformer for macOS and iOS. Open source, with a deterministic Swift core.">
+<meta property="og:description" content="An original arcade platformer for macOS and iOS, including the iPhone Duo. Six girders, a rain of barrels, two hammers. Open source, with a deterministic Swift core.">
+<meta property="og:url" content="https://vincentlauriat.github.io/barrel-climb/">
 <meta property="og:image" content="https://vincentlauriat.github.io/barrel-climb/assets/play.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-  :root {
-    color-scheme: dark;
-    --void: #140c24;
-    --void-deep: #0b0715;
-    --panel: #1d1236;
-    --girder: #fa50c8;
-    --girder-deep: #962878;
-    --ladder: #50c8ff;
-    --hammer: #fadc3c;
-    --ink: #f2ecff;
-    --mute: #9e93b8;
-    --line: #2d2049;
-    --display: "Press Start 2P", "Courier New", monospace;
-    --body: Archivo, "Helvetica Neue", Arial, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html { background: var(--void-deep); }
-  body {
-    margin: 0;
-    padding-inline: 22px;
-    background:
-      radial-gradient(120% 60% at 50% 0%, #241542 0%, rgba(20,12,36,0) 70%),
-      var(--void-deep);
-    color: var(--ink);
-    font-family: var(--body);
-    font-size: 17px;
-    line-height: 1.6;
-    overflow-x: clip;
-  }
-  /* The glow behind the screen bleeds past the cabinet on purpose. `clip` contains it
-     without turning the root into a scroll container, which `hidden` on body alone does
-     not do reliably. */
-  html { overflow-x: clip; }
-  img { max-width: 100%; height: auto; display: block; }
-  .px { image-rendering: pixelated; }
-  a { color: var(--ladder); text-underline-offset: 3px; }
-  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--hammer); outline-offset: 4px; }
-  main { max-width: 1040px; margin: 0 auto; }
+<link rel="preload" href="/assets/schibsted.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/monograph/v1/monograph.css">
 
-  h2 {
-    font-family: var(--display);
-    font-weight: 400;
-    font-size: clamp(13px, 1.9vw, 17px);
-    line-height: 1.6;
-    color: var(--girder);
-    margin: 0 0 28px;
-  }
-  h3 { margin: 0 0 10px; }
-  p { margin: 0 0 16px; max-width: 62ch; }
-  .band { padding-block: 72px; }
-  .band + .band { border-top: 1px solid var(--line); }
-
-  /* Hero: the marquee beside the cabinet screen */
-  .hero { display: grid; gap: 52px; grid-template-columns: 1fr; padding-block: 64px 76px; align-items: center; }
-  @media (min-width: 900px) { .hero { grid-template-columns: 1fr 380px; gap: 64px; } }
-  .marquee {
-    font-family: var(--display);
-    font-weight: 400;
-    font-size: clamp(26px, 5.2vw, 44px);
-    line-height: 1.3;
-    margin: 0 0 24px;
-    text-shadow: 3px 3px 0 var(--girder-deep), 6px 6px 0 rgba(250,80,200,.22);
-  }
-  .lede { font-size: 20px; line-height: 1.55; color: #ded3f5; max-width: 30ch; }
-  .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-  .btn {
-    font-family: var(--display); font-size: 11px; line-height: 1;
-    padding: 17px 20px; text-decoration: none; display: inline-block;
-    color: var(--void-deep); background: var(--hammer);
-    border: 0; box-shadow: 4px 4px 0 var(--girder-deep);
-    transition: transform .12s ease, box-shadow .12s ease;
-  }
-  .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ladder); }
-  .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--girder-deep); }
-  .btn.ghost:hover { box-shadow: inset 0 0 0 2px var(--hammer); }
-
-  /* The one loud element: the screen in its bezel */
-  .cabinet { position: relative; justify-self: center; width: 100%; max-width: 380px; }
-  .bezel {
-    position: relative; padding: 14px; border-radius: 16px;
-    background: linear-gradient(#37265c, #1a1030);
-    box-shadow: 0 30px 70px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.14);
-  }
-  .bezel::after {
-    content: ""; position: absolute; inset: 14px; border-radius: 4px; pointer-events: none;
-    background: repeating-linear-gradient(rgba(0,0,0,.26) 0 1px, transparent 1px 3px);
-  }
-  .bezel img { border-radius: 4px; width: 100%; }
-  .glow {
-    position: absolute; inset: -12% -10% -6%; z-index: -1; pointer-events: none;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(250,80,200,.34), rgba(250,80,200,0) 70%);
-  }
-
-  /* HUD readout: the game keeps score, so does the page */
-  .readout {
-    display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line);
-    grid-template-columns: repeat(2, 1fr); margin: 0;
-  }
-  @media (min-width: 760px) { .readout { grid-template-columns: repeat(4, 1fr); } }
-  .readout > div { background: var(--void); padding: 20px 18px; }
-  .readout dt { font-family: var(--display); font-size: 9px; color: var(--mute); margin-bottom: 14px; }
-  .readout dd { margin: 0; font-family: var(--display); font-size: 15px; color: var(--hammer); }
-  .readout dd span {
-    font-family: var(--body); font-size: 15px; font-weight: 500; color: var(--ink);
-    display: block; margin-top: 12px; line-height: 1.45;
-  }
-
-  /* Instruction card */
-  .card { border: 2px solid var(--ladder); background: var(--void); padding: 6px 24px 18px; max-width: 680px; overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 16px; }
-  th {
-    text-align: left; font-family: var(--display); font-size: 9px; font-weight: 400;
-    color: var(--ladder); padding: 18px 14px 12px 0; border-bottom: 2px solid var(--girder-deep);
-  }
-  td { padding: 13px 14px 13px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-  tr:last-child td { border-bottom: 0; }
-
-  .rules { display: grid; gap: 22px 20px; grid-template-columns: 44px 1fr; align-items: start; margin-top: 40px; max-width: 680px; }
-  .rules img { width: 36px; margin-top: 2px; }
-  .rules p { margin: 0; }
-
-  /* Devices */
-  .wide { max-width: 62ch; }
-  .lede.wide { max-width: 44ch; }
-  .note {
-    max-width: 62ch; color: var(--mute); font-size: 15.5px;
-    border-left: 2px solid var(--line); padding-left: 18px;
-  }
-  .devices { display: grid; gap: 34px; grid-template-columns: 1fr; }
-  @media (min-width: 760px) { .devices { grid-template-columns: 1fr 1fr; align-items: start; } }
-  figure { margin: 0; }
-  /* The captures are whole devices, so mostly letterbox black: bound their height or they
-     swamp the page. */
-  figure img { border: 2px solid var(--girder-deep); max-height: 460px; width: auto; }
-  figcaption { color: var(--mute); font-size: 15px; margin-top: 14px; max-width: 40ch; }
-
-  /* Under the hood */
-  .split { display: grid; gap: 40px; grid-template-columns: 1fr; }
-  @media (min-width: 760px) { .split { grid-template-columns: 1fr 1fr; } }
-  .split p { max-width: 46ch; margin-bottom: 0; color: #ded3f5; }
-  .split h3 {
-    color: var(--hammer); font-family: var(--display); font-size: 12px;
-    font-weight: 400; line-height: 1.6; margin-bottom: 18px;
-  }
-
-  /* Build: an actual sequence, so actually numbered */
-  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; max-width: 720px; }
-  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 38px 1fr; gap: 18px; margin-bottom: 28px; }
-  /* A grid item defaults to min-width: auto, so a wide <pre> stretches its column past
-     the viewport instead of scrolling inside itself. */
-  ol.steps li > *, .split > *, .hero > *, .devices > * { min-width: 0; }
-  ol.steps li::before {
-    content: counter(s); font-family: var(--display); font-size: 12px; color: var(--girder);
-    border: 1px solid var(--girder-deep); width: 38px; height: 38px; display: grid; place-items: center;
-  }
-  ol.steps p { margin: 0 0 10px; }
-  pre {
-    background: var(--void); border-left: 4px solid var(--girder); margin: 0;
-    padding: 16px 18px; overflow-x: auto; font-size: 14.5px; line-height: 1.65;
-  }
-  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  p code { background: var(--panel); padding: 2px 6px; font-size: .92em; }
-
-  footer { padding-block: 56px 72px; border-top: 1px solid var(--line); color: var(--mute); font-size: 15px; }
-  footer p { max-width: 70ch; }
-  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
-</style>
 </head>
 <body>
+<a class="skip" href="#content"><span class="en">Skip to content</span><span class="fr">Aller au contenu</span><span class="zh">跳至內容</span></a>
+<header class="running"><div class="wrap">
+<a class="back" href="https://vincentlauriat.github.io/#w36"><svg class="arw l" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg><span class="en">Vincent Lauriat</span><span class="fr">Vincent Lauriat</span><span class="zh">Vincent Lauriat</span></a>
+<span class="here"><span class="num">36</span> · Barrel Climb</span>
+<div class="langs" role="group" aria-label="Language / Langue / 語言"><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button><button type="button" data-lang="zh" aria-pressed="false">中文</button></div>
+<a class="gh" href="https://github.com/vincentlauriat/barrel-climb">GitHub</a>
+</div></header>
 <main>
+<section class="title"><div class="wrap g12">
+<h1 class="nm long" style="--len:12"><span class="no" aria-label="Work no. 36">36</span><span>Barrel Climb</span></h1>
+<p class="role"><span class="en">Original arcade platformer for macOS and iOS</span><span class="fr">Jeu de plateforme d'arcade original pour macOS et iOS</span><span class="zh">原創 macOS 與 iOS 街機平台遊戲</span></p>
+<div class="t-left">
+<p class="thesis"><span class="en">Six sloping girders, a rain of barrels, two hammers and a rescue at the top.</span><span class="fr">Six poutrelles en pente, une pluie de tonneaux, deux marteaux et un sauvetage tout en haut.</span><span class="zh">六道傾斜的鋼梁、一陣木桶雨、兩把鐵鎚，以及頂端等待的救援。</span></p>
+<p class='lede'><span class="en">An original arcade platformer for your Mac and your iPhone. Built to hold its shape on the <a href="#duo">iPhone Duo</a>, folded or open.</span><span class="fr">Un jeu de plateforme d'arcade original pour votre Mac et votre iPhone. Conçu pour garder sa forme sur l'<a href="#duo">iPhone Duo</a>, plié ou ouvert.</span><span class="zh">一款為你的 Mac 與 iPhone 打造的原創街機平台遊戲。在 <a href="#duo">iPhone Duo</a> 上無論折起或展開，都能保持畫面比例。</span></p>
+<div class="acts"><a class="btn" href="https://github.com/vincentlauriat/barrel-climb"><span class="en">Get the source</span><span class="fr">Obtenir les sources</span><span class="zh">取得原始碼</span></a><a class="lnk" href="#build"><span class="en">Build it</span><span class="fr">Le compiler</span><span class="zh">自行建置</span><svg class="arw" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></a></div>
 
-  <section class="hero">
-    <div>
-      <h1 class="marquee">Barrel Climb</h1>
-      <p class="lede">Six sloping girders, a rain of barrels, two hammers and a rescue at the top.</p>
-      <p>An original arcade platformer for your Mac and your iPhone. Built to hold its shape on the
-      <a href="#duo">iPhone Duo</a>, folded or open.</p>
-      <div class="actions">
-        <a class="btn" href="https://github.com/vincentlauriat/barrel-climb">Get the source</a>
-        <a class="btn ghost" href="#build">Build it</a>
-      </div>
-    </div>
-    <div class="cabinet">
-      <div class="glow" aria-hidden="true"></div>
-      <div class="bezel">
-        <img class="px" src="assets/play.png" width="896" height="1032" alt="The barrels stage in play: magenta girders, cyan ladders, barrels rolling down toward the climber, the ape and the captive at the top.">
-      </div>
-    </div>
-  </section>
-
-  <section class="band">
-    <h2>What it is made of</h2>
-    <dl class="readout">
-      <div><dt>TESTS</dt><dd>76<span>Every rule below is pinned by one.</span></dd></div>
-      <div><dt>STEP</dt><dd>1/60 s<span>Fixed. The simulation is a pure function.</span></dd></div>
-      <div><dt>SCREEN</dt><dd>224x256<span>Logical points. One scene, any shape of display.</span></dd></div>
-      <div><dt>DEPENDENCIES</dt><dd>0<span>Art and audio generated by two scripts.</span></dd></div>
-    </dl>
-  </section>
-
-  <section class="band">
-    <h2>How it plays</h2>
-    <div class="card">
-      <table>
-        <thead><tr><th>ACTION</th><th>MAC</th><th>CONTROLLER</th><th>IPHONE</th></tr></thead>
-        <tbody>
-          <tr><td>Walk, climb</td><td>Arrow keys or WASD</td><td>D-pad or left stick</td><td>Left pad</td></tr>
-          <tr><td>Jump, start</td><td>Space</td><td>A</td><td>Right button</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="rules">
-      <img class="px" src="assets/barrel_0.png" alt="" width="10" height="10">
-      <p>Barrels roll down every girder and pick a ladder at random. Jump one for 100 points; touch one and you lose a life. A ladder is no shelter.</p>
-      <img class="px" src="assets/hammer.png" alt="" width="10" height="10">
-      <p>Two hammers hang on the way up. Nine seconds of swinging, 300 a barrel &mdash; but you can neither jump nor climb while you hold one.</p>
-      <img class="px" src="assets/fireball_1.png" alt="" width="10" height="12">
-      <p>Every eighth barrel is blue. Let it reach the oil drum and a fireball climbs out to hunt you. Fireballs use the ladders too.</p>
-      <img class="px" src="assets/ladder.png" alt="" width="8" height="8">
-      <p>Five of the sixteen ladders are broken and stop halfway. You can start up them; you cannot get out that way.</p>
-      <img class="px" src="assets/pauline_1.png" alt="" width="16" height="24">
-      <p>Reach the platform at the top before the bonus hits zero. Then it all starts again, faster.</p>
-    </div>
-  </section>
-
-  <section class="band" id="duo">
-    <h2>Ready for the iPhone Duo</h2>
-    <p class="lede wide">The Duo folds between a 5.4-inch outer screen and a 7.6-inch inner one. Barrel Climb
-    carries no code for either.</p>
-    <p class="wide">The stage is 224 by 256 logical points and the scene scales to fit whatever display it is
-    handed, so the picture keeps its tall arcade shape and letterboxes the rest &mdash; in a Mac window, on a
-    phone, on a tablet, and on both halves of a fold. The touch controls anchor to the safe area rather than to
-    fixed coordinates, so they follow the screen as it changes. The app targets iOS 26, the release the Duo
-    ships with.</p>
-    <p class="note">No Duo simulator ships with Xcode 27.0 beta and the phone arrives on 23 October 2026, so
-    this is a design that holds rather than a device that has been tested. The two screens below bracket the
-    fold: a 19.5:9 phone and a 4:3 tablet.</p>
-    <div class="devices">
-      <figure>
-        <img class="px" src="assets/iphone.png" alt="The game on an iPhone, with a round movement pad on the left and a jump button on the right." width="1206" height="2622">
-        <figcaption>iPhone 17 Pro. The touch overlay hides itself the moment a controller connects.</figcaption>
-      </figure>
-      <figure>
-        <img class="px" src="assets/ipad.png" alt="The same scene on an iPad-sized display, letterboxed to keep its tall arcade shape." width="1668" height="2420">
-        <figcaption>A 4:3 display, the closest shape to the Duo unfolded. Same scene, same proportions, more letterbox.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="band">
-    <h2>Under the hood</h2>
-    <div class="split">
-      <div>
-        <h3>The game is a pure function</h3>
-        <p>The simulation is a Swift package that imports no UI framework, no clock and no
-        system random source. It advances by exactly 1/60 s from an input struct and a
-        seeded random source, and hands back the list of things that happened. That is why
-        76 deterministic tests cover every rule on this page and finish in hundredths of a
-        second, without ever opening a window.</p>
-      </div>
-      <div>
-        <h3>The screen only mirrors it</h3>
-        <p>One SpriteKit scene of 224 x 256 logical points copies the world into sprite
-        nodes after each step and turns the returned events into sound. It never owns game
-        state. Fitting that picture to the display is a single setting, which is the entire
-        foldable-phone support, and one Xcode target covers macOS and iOS from one
-        generated project.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="build">
-    <h2>Build it</h2>
-    <p>You need Xcode 27 and <a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>.
-    No signing setup, no developer account.</p>
-    <ol class="steps">
-      <li>
-        <div>
-          <p>Clone it.</p>
-<pre><code>git clone https://github.com/vincentlauriat/barrel-climb.git
-cd barrel-climb</code></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <p>Play it on your Mac.</p>
-<pre><code>make run-mac</code></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <p>Or put it in the iPhone Simulator.</p>
-<pre><code>make build-ios
+</div>
+<div class="t-right"><figure class="plate ink"><div class="pl"><img src="assets/play.png" alt="The barrels stage in play: magenta girders, cyan ladders, barrels rolling down toward the climber, the ape and the captive at the top." width="896" height="1032" decoding="async"></div><figcaption><span class="fg"><span class="en">Fig.</span><span class="fr">Fig.</span><span class="zh">圖</span> 1</span></figcaption></figure></div>
+</div></section>
+<section class="opener" id="content"><div class="wrap"><div class="op-grid"><div class="numeral" aria-hidden="true">36</div><div class="op-text"><h2><span class="en">What it is made of</span><span class="fr">De quoi il est fait</span><span class="zh">它由什麼構成</span></h2></div></div></div></section>
+<section class="chapter"><div class="wrap"><ul class="specs"><li><h3><span class="en">Tests: 76</span><span class="fr">Tests : 76</span><span class="zh">測試：76</span></h3><div><p><span class="en">Every rule below is pinned by one.</span><span class="fr">Chaque règle ci-dessous est verrouillée par l'un d'eux.</span><span class="zh">下方的每一條規則都由一個測試鎖定。</span></p></div></li><li><h3><span class="en">Step: 1/60 s</span><span class="fr">Pas : 1/60 s</span><span class="zh">步長：1/60 秒</span></h3><div><p><span class="en">Fixed. The simulation is a pure function.</span><span class="fr">Fixe. La simulation est une fonction pure.</span><span class="zh">固定。模擬是一個純函式。</span></p></div></li><li><h3><span class="en">Screen: 224x256</span><span class="fr">Écran : 224x256</span><span class="zh">畫面：224x256</span></h3><div><p><span class="en">Logical points. One scene, any shape of display.</span><span class="fr">Points logiques. Une seule scène, quelle que soit la forme de l'écran.</span><span class="zh">邏輯點。一個場景，適用任何形狀的螢幕。</span></p></div></li><li><h3><span class="en">Dependencies: 0</span><span class="fr">Dépendances : 0</span><span class="zh">相依套件：0</span></h3><div><p><span class="en">Art and audio generated by two scripts.</span><span class="fr">Graphismes et sons générés par deux scripts.</span><span class="zh">美術與音效由兩支腳本產生。</span></p></div></li></ul></div></section>
+<section class="chapter" id="play"><div class="wrap g12"><div class="ch-head"><h2><span class="en">How it plays</span><span class="fr">Comment on joue</span><span class="zh">怎麼玩</span></h2></div><div class="ch-body"><div class="tbl-wrap"><table class="tbl"><thead><tr><th><span class="en">Action</span><span class="fr">Action</span><span class="zh">動作</span></th><th>Mac</th><th><span class="en">Controller</span><span class="fr">Manette</span><span class="zh">控制器</span></th><th>iPhone</th></tr></thead><tbody><tr><td><span class="en">Walk, climb</span><span class="fr">Marcher, grimper</span><span class="zh">行走、攀爬</span></td><td><span class="en">Arrow keys or WASD</span><span class="fr">Flèches ou WASD</span><span class="zh">方向鍵或 WASD</span></td><td><span class="en">D-pad or left stick</span><span class="fr">Croix directionnelle ou stick gauche</span><span class="zh">十字鍵或左搖桿</span></td><td><span class="en">Left pad</span><span class="fr">Pavé de gauche</span><span class="zh">左側方向盤</span></td></tr><tr><td><span class="en">Jump, start</span><span class="fr">Sauter, commencer</span><span class="zh">跳躍、開始</span></td><td><span class="en">Space</span><span class="fr">Espace</span><span class="zh">空白鍵</span></td><td>A</td><td><span class="en">Right button</span><span class="fr">Bouton de droite</span><span class="zh">右側按鈕</span></td></tr></tbody></table></div><p><span class="en">Barrels roll down every girder and pick a ladder at random. Jump one for 100 points; touch one and you lose a life. A ladder is no shelter.</span><span class="fr">Les tonneaux dévalent chaque poutrelle et choisissent une échelle au hasard. Sautez-en un pour 100 points ; touchez-en un et vous perdez une vie. Une échelle n'est pas un abri.</span><span class="zh">木桶會沿著每一道鋼梁滾下，並隨機選擇梯子。跳過一個得 100 分；碰到一個就失去一條命。梯子不是避難所。</span></p><p><span class="en">Two hammers hang on the way up. Nine seconds of swinging, 300 a barrel &mdash; but you can neither jump nor climb while you hold one.</span><span class="fr">Deux marteaux sont suspendus sur le chemin. Neuf secondes à frapper, 300 par tonneau &mdash; mais impossible de sauter ou de grimper tant que vous en tenez un.</span><span class="zh">往上的路上掛著兩把鐵鎚。九秒的揮舞時間，每個木桶 300 分 &mdash; 但拿著鐵鎚時既不能跳也不能爬。</span></p><p><span class="en">Every eighth barrel is blue. Let it reach the oil drum and a fireball climbs out to hunt you. Fireballs use the ladders too.</span><span class="fr">Un tonneau sur huit est bleu. Laissez-le atteindre le bidon d'huile et une boule de feu en sort pour vous traquer. Les boules de feu prennent aussi les échelles.</span><span class="zh">每第八個木桶是藍色的。讓它滾到油桶，就會冒出一團火球來追捕你。火球也會爬梯子。</span></p><p><span class="en">Five of the sixteen ladders are broken and stop halfway. You can start up them; you cannot get out that way.</span><span class="fr">Cinq des seize échelles sont cassées et s'arrêtent à mi-hauteur. Vous pouvez commencer à les gravir ; vous ne pouvez pas sortir par là.</span><span class="zh">十六座梯子中有五座是斷的，只到一半。你可以開始往上爬，但無法從那裡出去。</span></p><p><span class="en">Reach the platform at the top before the bonus hits zero. Then it all starts again, faster.</span><span class="fr">Atteignez la plateforme du sommet avant que le bonus tombe à zéro. Puis tout recommence, plus vite.</span><span class="zh">在獎勵分數歸零前抵達頂端平台。接著一切重新開始，而且更快。</span></p></div></div></section><section class="chapter" id="duo"><div class="wrap g12"><div class="ch-head"><h2><span class="en">Ready for the iPhone Duo</span><span class="fr">Prêt pour l'iPhone Duo</span><span class="zh">為 iPhone Duo 做好準備</span></h2><p><span class="en">The Duo folds between a 5.4-inch outer screen and a 7.6-inch inner one. Barrel Climb carries no code for either.</span><span class="fr">Le Duo se plie entre un écran extérieur de 5,4 pouces et un écran intérieur de 7,6 pouces. Barrel Climb ne contient de code ni pour l'un ni pour l'autre.</span><span class="zh">Duo 可在 5.4 吋外螢幕與 7.6 吋內螢幕之間折疊。Barrel Climb 沒有為任何一者撰寫專屬程式碼。</span></p></div><div class="ch-body"><p><span class="en">The stage is 224 by 256 logical points and the scene scales to fit whatever display it is handed, so the picture keeps its tall arcade shape and letterboxes the rest &mdash; in a Mac window, on a phone, on a tablet, and on both halves of a fold. The touch controls anchor to the safe area rather than to fixed coordinates, so they follow the screen as it changes. The app targets iOS 26, the release the Duo ships with.</span><span class="fr">La scène mesure 224 sur 256 points logiques et s'adapte à l'écran qu'on lui confie : l'image garde sa forme haute d'arcade et le reste est comblé de bandes noires &mdash; dans une fenêtre Mac, sur un téléphone, sur une tablette, et sur les deux moitiés d'un écran pliable. Les commandes tactiles s'ancrent à la zone de sécurité plutôt qu'à des coordonnées fixes, si bien qu'elles suivent l'écran quand il change. L'app cible iOS 26, la version livrée avec le Duo.</span><span class="zh">舞台為 224 × 256 個邏輯點，場景會縮放以符合任何交給它的螢幕，因此畫面保持高瘦的街機比例，其餘部分以黑邊填補 &mdash; 無論是在 Mac 視窗、手機、平板，或是折疊螢幕的兩半上。觸控操作錨定在安全區域，而非固定座標，因此會隨螢幕變化而跟著移動。App 以 iOS 26 為目標，也就是 Duo 出廠搭載的版本。</span></p><p><span class="en">No Duo simulator ships with Xcode 27.0 beta and the phone arrives on 23 October 2026, so this is a design that holds rather than a device that has been tested. The two screens below bracket the fold: a 19.5:9 phone and a 4:3 tablet.</span><span class="fr">Aucun simulateur de Duo n'est fourni avec Xcode 27.0 bêta et le téléphone arrive le 23 octobre 2026 : c'est donc une conception qui tient, plutôt qu'un appareil qui a été testé. Les deux écrans ci-dessous encadrent le pliage : un téléphone 19,5:9 et une tablette 4:3.</span><span class="zh">Xcode 27.0 beta 並未附帶 Duo 模擬器，而這支手機要到 2026 年 10 月 23 日才上市，因此這是一個站得住腳的設計，而非已經實機測試過的裝置。下方兩個畫面涵蓋了折疊的兩端：一支 19.5:9 的手機與一台 4:3 的平板。</span></p><div class="plates"><figure class="plate ink"><div class="pl"><img src="assets/iphone.png" alt="The game on an iPhone, with a round movement pad on the left and a jump button on the right." width="1206" height="2622" loading="lazy" decoding="async"></div><figcaption><span class="fg"><span class="en">Fig.</span><span class="fr">Fig.</span><span class="zh">圖</span> 2</span><span class="en">iPhone 17 Pro. The touch overlay hides itself the moment a controller connects.</span><span class="fr">iPhone 17 Pro. La surcouche tactile se masque dès qu'une manette se connecte.</span><span class="zh">iPhone 17 Pro。只要連接控制器，觸控介面就會自動隱藏。</span></figcaption></figure><figure class="plate ink"><div class="pl"><img src="assets/ipad.png" alt="The same scene on an iPad-sized display, letterboxed to keep its tall arcade shape." width="1668" height="2420" loading="lazy" decoding="async"></div><figcaption><span class="fg"><span class="en">Fig.</span><span class="fr">Fig.</span><span class="zh">圖</span> 3</span><span class="en">A 4:3 display, the closest shape to the Duo unfolded. Same scene, same proportions, more letterbox.</span><span class="fr">Un écran 4:3, la forme la plus proche du Duo déplié. Même scène, mêmes proportions, plus de bandes noires.</span><span class="zh">一個 4:3 螢幕，最接近 Duo 展開時的形狀。同樣的場景、同樣的比例，更多黑邊。</span></figcaption></figure></div></div></div></section><section class="chapter" id="hood"><div class="wrap g12"><div class="ch-head"><h2><span class="en">Under the hood</span><span class="fr">Sous le capot</span><span class="zh">幕後原理</span></h2></div><div class="ch-body"><ul class="specs"><li><h3><span class="en">The game is a pure function</span><span class="fr">Le jeu est une fonction pure</span><span class="zh">遊戲是一個純函式</span></h3><div><p><span class="en">The simulation is a Swift package that imports no UI framework, no clock and no system random source. It advances by exactly 1/60 s from an input struct and a seeded random source, and hands back the list of things that happened. That is why 76 deterministic tests cover every rule on this page and finish in hundredths of a second, without ever opening a window.</span><span class="fr">La simulation est un package Swift qui n'importe aucun framework d'interface, aucune horloge et aucune source aléatoire du système. Elle avance d'exactement 1/60 s à partir d'une structure d'entrées et d'une source aléatoire à graine, et renvoie la liste de ce qui s'est passé. C'est pourquoi 76 tests déterministes couvrent chaque règle de cette page et s'exécutent en quelques centièmes de seconde, sans jamais ouvrir de fenêtre.</span><span class="zh">模擬是一個 Swift 套件，不匯入任何 UI 框架、時鐘或系統亂數來源。它根據一個輸入結構與一個帶種子的亂數來源，每次精確前進 1/60 秒，並回傳發生事件的清單。正因如此，76 個確定性測試涵蓋了本頁的每一條規則，而且在百分之幾秒內就跑完，完全不必開啟視窗。</span></p></div></li><li><h3><span class="en">The screen only mirrors it</span><span class="fr">L'écran ne fait que la refléter</span><span class="zh">畫面只是它的鏡像</span></h3><div><p><span class="en">One SpriteKit scene of 224 x 256 logical points copies the world into sprite nodes after each step and turns the returned events into sound. It never owns game state. Fitting that picture to the display is a single setting, which is the entire foldable-phone support, and one Xcode target covers macOS and iOS from one generated project.</span><span class="fr">Une seule scène SpriteKit de 224 x 256 points logiques recopie le monde dans des nœuds de sprites après chaque pas et transforme les événements renvoyés en sons. Elle ne possède jamais l'état du jeu. Adapter cette image à l'écran tient en un seul réglage, qui constitue tout le support des téléphones pliables, et une seule cible Xcode couvre macOS et iOS depuis un projet généré unique.</span><span class="zh">一個 224 x 256 邏輯點的 SpriteKit 場景，會在每一步之後把世界複製到 sprite 節點中，並把回傳的事件轉成聲音。它從不持有遊戲狀態。讓畫面符合螢幕只需一項設定，這就是對折疊手機的全部支援；而一個 Xcode target 就從單一產生的專案涵蓋 macOS 與 iOS。</span></p></div></li></ul></div></div></section><section class="chapter" id="build"><div class="wrap g12"><div class="ch-head"><h2><span class="en">Build it</span><span class="fr">Le compiler</span><span class="zh">自行建置</span></h2><p><span class="en">You need Xcode 27 and <a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>. No signing setup, no developer account.</span><span class="fr">Il vous faut Xcode 27 et <a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>. Aucune configuration de signature, aucun compte développeur.</span><span class="zh">你需要 Xcode 27 與 <a href="https://github.com/yonaskolb/XcodeGen">XcodeGen</a>。不需要設定簽章，也不需要開發者帳號。</span></p></div><div class="ch-body"><p><span class="en">Clone it.</span><span class="fr">Clonez-le.</span><span class="zh">複製儲存庫。</span></p><pre><code>git clone https://github.com/vincentlauriat/barrel-climb.git
+cd barrel-climb</code></pre><p><span class="en">Play it on your Mac.</span><span class="fr">Jouez-y sur votre Mac.</span><span class="zh">在你的 Mac 上玩。</span></p><pre><code>make run-mac</code></pre><p><span class="en">Or put it in the iPhone Simulator.</span><span class="fr">Ou installez-le dans le simulateur iPhone.</span><span class="zh">或把它裝進 iPhone 模擬器。</span></p><pre><code>make build-ios
 xcrun simctl install booted \
-  build/DerivedData/Build/Products/Debug-iphonesimulator/'Barrel Climb.app'
-xcrun simctl launch booted fr.lauriat.DonkeyKong</code></pre>
-        </div>
-      </li>
-      <li>
-        <div>
-          <p>Poke at it. The tests need no simulator, and the art, audio and icon all
-          regenerate from source.</p>
-<pre><code>make test
-make sprites sounds icon</code></pre>
-        </div>
-      </li>
-    </ol>
-  </section>
-
-  <footer>
-    <p>Barrel Climb is an original work by Vincent Lauriat. It borrows the <em>mechanics</em>
-    of a 1981 arcade classic and nothing else: no Nintendo artwork, sound, level data or
-    names appear anywhere in this project. Every sprite and every sound here is generated
-    by a Python script in the repository.</p>
-    <p><a href="https://github.com/vincentlauriat/barrel-climb">Source, issues and roadmap on GitHub</a>.
-    Next up: the pie factory, the elevators and the rivets.</p>
-  </footer>
-
+  build/DerivedData/Build/Products/Debug-iphonesimulator/&#x27;Barrel Climb.app&#x27;
+xcrun simctl launch booted fr.lauriat.DonkeyKong</code></pre><p><span class="en">Poke at it. The tests need no simulator, and the art, audio and icon all regenerate from source.</span><span class="fr">Bidouillez-le. Les tests n'ont besoin d'aucun simulateur, et les graphismes, les sons et l'icône se régénèrent tous depuis les sources.</span><span class="zh">動手玩玩看。測試不需要模擬器，美術、音效與圖示也都能從原始碼重新產生。</span></p><pre><code>make test
+make sprites sounds icon</code></pre></div></div></section>
+<section class="close"><div class="wrap g12"><h2><span class="en">Get the source</span><span class="fr">Obtenir les sources</span><span class="zh">取得原始碼</span></h2><div class="c-r"><p><span class="en"><a href="https://github.com/vincentlauriat/barrel-climb">Source, issues and roadmap on GitHub</a>. Next up: the pie factory, the elevators and the rivets.</span><span class="fr"><a href="https://github.com/vincentlauriat/barrel-climb">Sources, tickets et feuille de route sur GitHub</a>. Prochaines étapes : l'usine à tartes, les ascenseurs et les rivets.</span><span class="zh"><a href="https://github.com/vincentlauriat/barrel-climb">原始碼、問題回報與開發藍圖都在 GitHub 上</a>。接下來：派工廠、電梯與鉚釘。</span></p><div class="acts"><a class="btn" href="https://github.com/vincentlauriat/barrel-climb"><span class="en">Get the source</span><span class="fr">Obtenir les sources</span><span class="zh">取得原始碼</span></a><a class="lnk" href="#build"><span class="en">Build it</span><span class="fr">Le compiler</span><span class="zh">自行建置</span><svg class="arw" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></a></div></div></div></section>
 </main>
+<footer class="colophon"><div class="wrap g12"><div class="c1"><h2>Barrel Climb</h2><p><span class="en">Work no.</span><span class="fr">Réalisation n°</span><span class="zh">作品編號</span> <span class="num">36</span> <span class="en">in the works of Vincent Lauriat</span><span class="fr">dans les réalisations de Vincent Lauriat</span><span class="zh">收錄於 Vincent Lauriat 作品集</span>.</p><p><a href="https://vincentlauriat.github.io/#w36"><span class="en">All works</span><span class="fr">Toutes les réalisations</span><span class="zh">全部作品</span></a></p></div><div class="c2"><h2><span class="en">Source</span><span class="fr">Source</span><span class="zh">原始碼</span></h2><p><a href="https://github.com/vincentlauriat/barrel-climb">github.com/vincentlauriat/barrel-climb</a></p><p><span class="en">MIT License</span><span class="fr">Licence MIT</span><span class="zh">MIT 授權</span> · © 2026 Vincent Lauriat</p><p><span class="en">Barrel Climb is an original work by Vincent Lauriat. It borrows the <em>mechanics</em> of a 1981 arcade classic and nothing else: no Nintendo artwork, sound, level data or names appear anywhere in this project. Every sprite and every sound here is generated by a Python script in the repository.</span><span class="fr">Barrel Climb est une œuvre originale de Vincent Lauriat. Il emprunte les <em>mécaniques</em> d'un classique d'arcade de 1981 et rien d'autre : aucun graphisme, son, donnée de niveau ou nom de Nintendo n'apparaît nulle part dans ce projet. Chaque sprite et chaque son est généré par un script Python du dépôt.</span><span class="zh">Barrel Climb 是 Vincent Lauriat 的原創作品。它只借用了一款 1981 年街機經典的<em>玩法機制</em>，其餘一概沒有：本專案中任何地方都不含 Nintendo 的美術、音效、關卡資料或名稱。這裡的每一個 sprite 與每一段聲音，都由儲存庫中的 Python 腳本產生。</span></p></div><div class="c3"><h2><span class="en">About this page</span><span class="fr">À propos de cette page</span><span class="zh">關於本頁</span></h2><p><span class="en">Set in Schibsted Grotesk, on the grid of the book it belongs to.</span><span class="fr">Composée en Schibsted Grotesk, sur la grille du livre auquel elle appartient.</span><span class="zh">以 Schibsted Grotesk 排版，沿用其所屬作品集的網格。</span></p></div></div></footer>
+<script src="/assets/monograph/v1/monograph.js"></script>
 </body>
 </html>
